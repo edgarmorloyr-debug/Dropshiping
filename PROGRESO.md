@@ -2,7 +2,7 @@
 
 ## En qué vamos
 
-**Paso 3 (primera parte) listo para revisar: la tienda funciona en modo demostración (Inicio, Producto, Carrito, Pagar y Confirmación), con productos y datos de pago de ejemplo. Falta: panel privado de pedidos y conexión a Supabase.**
+**Paso 3 (primera parte) aprobado por el dueño (2026-10-24): la tienda funciona en modo demostración y está publicada en https://dropshiping-wine.vercel.app. Sigue: paso 4, panel privado de pedidos y conexión a Supabase.**
 
 ## Decisiones tomadas (2026-10-24)
 
@@ -15,6 +15,8 @@
 | Tema | Hogar y cocina | Cavecom-e: lo más vendido por internet en Venezuela (dato de 2024) |
 | Boceto | Aprobado tal cual: Inicio, Producto, Pagar sin crear cuenta y panel privado | Precio final visible desde el inicio y sin registro obligatorio (las dos causas principales de abandono según Baymard) |
 | Base técnica | Vercel (publicar la página) + Supabase (pedidos, comprobantes privados y acceso al panel), en un proyecto de Supabase aparte del de Knight Core | Gratis para empezar y el dueño ya conoce las dos |
+| Tienda en demostración | Aprobada tal cual (Inicio, Producto, Carrito, Pagar, Confirmación) | El dueño la probó en su teléfono desde Vercel |
+| Ramas | `claude/elegant-hawking-lv5prd` = pruebas; `main` = la que publica la tienda | Lo aprobado pasa a `main` con pruebas, typecheck y build en verde |
 | Proveedor | Dropi Venezuela, por confirmar | Hay que verificar si acepta pedidos ya pagados (trabaja sobre todo contra entrega) |
 
 ## Reglas
@@ -44,7 +46,7 @@
 2. Elegir de 2 a 3 productos con precios reales del catálogo de Dropi.
 3. Construir la tienda (catálogo, carrito, pago con referencia y comprobante).
 4. Construir el panel privado de pedidos.
-5. Publicarla en internet (Vercel).
+5. Publicarla en internet (Vercel). ✅ Publicada en modo demostración.
 6. Probar con publicidad pequeña y quedarse con el producto que venda.
 7. Agregar Colombia.
 
