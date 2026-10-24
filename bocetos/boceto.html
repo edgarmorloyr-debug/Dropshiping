@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boceto de la tienda</title>
+<style>
+  :root { --tinta:#1f2328; --gris:#5b6270; --borde:#d0d4da; --fondo:#f6f7f9; --naranja:#c2410c; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family: system-ui, sans-serif; font-size:15px; color:var(--tinta); background:#e9ebef; }
+  .fila { display:flex; gap:24px; padding:24px; flex-wrap:wrap; }
+  .tel { width:360px; background:#fff; border:2px solid var(--tinta); border-radius:24px; overflow:hidden; }
+  .titulo { text-align:center; font-weight:700; padding:6px; background:var(--tinta); color:#fff; font-size:14px; }
+  .barra { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid var(--borde); }
+  .logo { font-weight:800; }
+  .caja { border:2px dashed var(--borde); border-radius:12px; background:var(--fondo); display:flex; align-items:center; justify-content:center; color:var(--gris); text-align:center; }
+  .sec { padding:14px 16px; }
+  h2 { font-size:18px; margin:0 0 6px; }
+  p { margin:4px 0; }
+  .peq { color:var(--gris); font-size:14px; }
+  .btn { display:block; width:100%; min-height:48px; border-radius:10px; border:2px solid var(--tinta); background:#fff; color:var(--tinta); font-size:16px; font-weight:700; margin-top:10px; }
+  .btn.naranja { background:var(--naranja); color:#fff; border-color:var(--naranja); }
+  .rejilla { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; }
+  .chip { border:1px solid var(--borde); border-radius:999px; padding:4px 10px; font-size:14px; }
+  .chip.sel { border:2px solid var(--tinta); font-weight:700; }
+  .campo { border:1px solid var(--borde); border-radius:8px; min-height:44px; padding:10px; color:var(--gris); margin-top:8px; font-size:14px; }
+  .nota { background:#fff7e6; border-left:4px solid var(--naranja); padding:8px 10px; font-size:14px; margin-top:8px; }
+  .pedido { border:1px solid var(--borde); border-radius:10px; padding:10px; margin-bottom:10px; }
+  .dos { display:flex; gap:8px; } .dos .btn { margin-top:8px; }
+</style>
+</head>
+<body>
+<div class="fila">
+
+  <!-- 1. INICIO -->
+  <div class="tel">
+    <div class="titulo">1 · Inicio</div>
+    <div class="barra"><span class="logo">NOMBRE DE LA TIENDA</span><span>🛒 0</span></div>
+    <div class="sec">
+      <div class="caja" style="height:190px">Video o foto grande<br>del producto estrella</div>
+      <h2 style="margin-top:12px">Frase corta: qué problema te resuelve</h2>
+      <p class="peq">Precio final en $ y en Bs., con el envío incluido</p>
+      <button class="btn naranja">Ver producto</button>
+    </div>
+    <div class="sec">
+      <h2>Más para tu cocina</h2>
+      <div class="rejilla">
+        <div><div class="caja" style="height:110px">Foto</div><p>Producto 2</p><p class="peq">$ / Bs.</p></div>
+        <div><div class="caja" style="height:110px">Foto</div><p>Producto 3</p><p class="peq">$ / Bs.</p></div>
+      </div>
+    </div>
+    <div class="sec">
+      <h2>Pagas como prefieras</h2>
+      <div class="chips"><span class="chip">Pago Móvil</span><span class="chip">Zelle</span><span class="chip">Binance</span><span class="chip">Transferencia</span><span class="chip">PayPal</span></div>
+      <p class="peq" style="margin-top:8px">📦 Envíos a toda Venezuela (MRW · Zoom · Liberty Express)<br>💬 ¿Dudas? Escríbenos por WhatsApp</p>
+    </div>
+  </div>
+
+  <!-- 2. PRODUCTO -->
+  <div class="tel">
+    <div class="titulo">2 · Producto</div>
+    <div class="barra"><span>← Volver</span><span>🛒 0</span></div>
+    <div class="sec">
+      <div class="caja" style="height:230px">Fotos reales (se deslizan)<br>+ video corto de uso</div>
+      <h2 style="margin-top:12px">Nombre del producto</h2>
+      <p><b>$ 15</b> · <span class="peq">Bs. según tasa del día</span></p>
+      <p class="peq">Envío incluido · Llega en 2 a 5 días</p>
+      <button class="btn naranja">Comprar ahora</button>
+      <button class="btn">Agregar al carrito</button>
+    </div>
+    <div class="sec">
+      <h2>Por qué te va a gustar</h2>
+      <p class="peq">• Beneficio 1<br>• Beneficio 2<br>• Beneficio 3</p>
+      <h2 style="margin-top:12px">Opiniones de clientes</h2>
+      <div class="caja" style="height:70px">⭐ Opiniones reales (cuando las haya)</div>
+    </div>
+  </div>
+
+  <!-- 3. PAGAR -->
+  <div class="tel">
+    <div class="titulo">3 · Pagar (sin crear cuenta)</div>
+    <div class="barra"><span>← Volver</span><span class="logo">Total: $ 15</span></div>
+    <div class="sec">
+      <h2>1. ¿A dónde te lo enviamos?</h2>
+      <div class="campo">Nombre y apellido</div>
+      <div class="campo">Teléfono (WhatsApp)</div>
+      <div class="campo">Estado, ciudad y oficina de envío</div>
+    </div>
+    <div class="sec">
+      <h2>2. ¿Cómo vas a pagar?</h2>
+      <div class="chips"><span class="chip sel">Pago Móvil</span><span class="chip">Zelle</span><span class="chip">Binance</span><span class="chip">Transferencia</span><span class="chip">PayPal</span></div>
+      <div class="nota">Paga <b>Bs. (monto exacto)</b> a:<br>Banco · Teléfono · Cédula<br><span class="peq">Datos del dueño de la tienda</span></div>
+    </div>
+    <div class="sec">
+      <h2>3. Confirma tu pago</h2>
+      <div class="campo">Número de referencia</div>
+      <div class="campo">📎 Foto del comprobante</div>
+      <button class="btn naranja">Enviar mi pedido</button>
+      <p class="peq">Te avisamos por WhatsApp cuando confirmemos tu pago.</p>
+    </div>
+  </div>
+
+  <!-- 4. PANEL DEL DUEÑO -->
+  <div class="tel">
+    <div class="titulo">4 · Tu panel privado de pedidos</div>
+    <div class="barra"><span class="logo">Pedidos</span><span class="peq">Solo tú entras</span></div>
+    <div class="sec">
+      <div class="chips" style="margin-bottom:10px"><span class="chip sel">Por revisar (2)</span><span class="chip">Pagados</span><span class="chip">Enviados</span></div>
+      <div class="pedido">
+        <p><b>Pedido #0012</b> · María P. · Valencia</p>
+        <p class="peq">Pago Móvil · Bs. (monto) · Ref. 123456</p>
+        <div class="caja" style="height:60px">Foto del comprobante</div>
+        <div class="dos"><button class="btn naranja">Pago confirmado</button><button class="btn">Rechazar</button></div>
+      </div>
+      <div class="pedido">
+        <p><b>Pedido #0011</b> · José R. · Caracas</p>
+        <p class="peq">Zelle · $ 15 · Ref. ABC987</p>
+        <p class="peq">(mismos botones)</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
