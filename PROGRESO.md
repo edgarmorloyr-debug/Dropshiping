@@ -2,7 +2,7 @@
 
 ## En qué vamos
 
-**Paso 1 de la hoja de ruta: boceto de la tienda (esperando aprobación del dueño).**
+**Paso 1 listo: boceto aprobado por el dueño (2026-10-24), en `bocetos/`. Sigue: elegir con qué se construye y los productos.**
 
 ## Decisiones tomadas (2026-10-24)
 
@@ -13,6 +13,7 @@
 | Cobro | Solo pago en línea, verificado a mano en un panel privado | En Venezuela no hay cobro automático con tarjeta (Stripe y Mercado Pago no operan ahí) |
 | Formas de pago | Pago Móvil, Zelle, Binance (USDT), transferencia bancaria y PayPal | Elección del dueño. PayPal cobra cerca del 5,4 % más un monto fijo |
 | Tema | Hogar y cocina | Cavecom-e: lo más vendido por internet en Venezuela (dato de 2024) |
+| Boceto | Aprobado tal cual: Inicio, Producto, Pagar sin crear cuenta y panel privado | Precio final visible desde el inicio y sin registro obligatorio (las dos causas principales de abandono según Baymard) |
 | Proveedor | Dropi Venezuela, por confirmar | Hay que verificar si acepta pedidos ya pagados (trabaja sobre todo contra entrega) |
 
 ## Reglas
