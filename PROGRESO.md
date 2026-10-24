@@ -2,7 +2,7 @@
 
 ## En qué vamos
 
-**Paso 3 (primera parte) aprobado por el dueño (2026-10-24): la tienda funciona en modo demostración y está publicada en https://dropshiping-wine.vercel.app. Sigue: paso 4, panel privado de pedidos y conexión a Supabase.**
+**Paso 3 aprobado (2026-10-24); publicada en https://dropshiping-wine.vercel.app. Paso 4 listo para revisar: panel privado en `#/panel` y conexión a Supabase (`supabase/cambios/001_tienda.sql`). Sin las claves de Supabase todo sigue en modo demostración.**
 
 ## Decisiones tomadas (2026-10-24)
 
@@ -31,11 +31,19 @@
 - `src/config.ts`: nombre, WhatsApp, días de entrega, empresas de envío y datos de cobro. **Todo lo que el dueño puede querer cambiar está aquí.**
 - `src/logica/`: cálculo de totales y bolívares (en centavos, sin decimales perdidos) y validación de teléfono y cédula venezolanos.
 - `src/datos/`: el «almacén». Hoy es de demostración (productos de ejemplo y pedidos guardados en el navegador). El de Supabase cumplirá el mismo contrato.
-- `src/pantallas/`: las pantallas del boceto aprobado.
+- `src/pantallas/`: las pantallas del boceto aprobado, más el panel (`Panel.tsx`, en `#/panel`).
+- `src/datos/supabase.ts`: el almacén real. Se activa solo si existen `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` (en Vercel → Settings → Environment Variables).
+- `supabase/cambios/001_tienda.sql`: tablas, permisos, carpeta privada de comprobantes y las funciones `crear_pedido` (calcula el total en el servidor), `cambiar_estado_pedido` y `guardar_tasa`. Probado en `src/datos/supabase.test.ts`.
+- `supabase/hacerme_admin.sql`: da acceso al panel al único usuario que exista. `supabase/revisar.sql`: muestra qué está cargado.
+
+## Pendientes conocidos
+
+- Si el dueño cambia la tasa justo mientras un cliente está pagando, el pedido queda guardado con la tasa nueva. El dueño lo ve en el panel al comparar el monto con el comprobante.
+- La demostración no guarda la foto del comprobante (solo su nombre).
 
 | Comando | Qué deberías ver |
 |---|---|
-| `npm test` | `Tests  20 passed` (o más) |
+| `npm test` | `Tests  44 passed` (o más) |
 | `npm run typecheck` | Nada (todo bien) |
 | `npm run build` | `built in …` |
 | `npm run dev` | Una dirección como `http://localhost:5173` |
@@ -45,7 +53,7 @@
 1. Boceto de las pantallas: Inicio, Producto, Pagar y Panel de pedidos.
 2. Elegir de 2 a 3 productos con precios reales del catálogo de Dropi.
 3. Construir la tienda (catálogo, carrito, pago con referencia y comprobante).
-4. Construir el panel privado de pedidos.
+4. Construir el panel privado de pedidos. ✅ Hecho, esperando aprobación y que el dueño cargue Supabase.
 5. Publicarla en internet (Vercel). ✅ Publicada en modo demostración.
 6. Probar con publicidad pequeña y quedarse con el producto que venda.
 7. Agregar Colombia.

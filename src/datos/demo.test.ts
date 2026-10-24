@@ -41,4 +41,30 @@ describe('almacén de demostración', () => {
     await expect(almacen.crearPedido([{ productoId: 'falso', cantidad: 1 }], envio, pago))
       .rejects.toThrow(ErrorPedido);
   });
+
+  it('guarda el nombre y el precio del momento, para mostrarlos en el panel', async () => {
+    const almacen = crearAlmacenDemo(guardadoFalso());
+    await almacen.crearPedido([{ productoId: 'picador-verduras', cantidad: 3 }], envio, pago);
+    const [pedido] = await almacen.panel.listarPedidos();
+    expect(pedido.lineas).toEqual([{ productoId: 'picador-verduras', nombre: 'Picador de verduras manual', cantidad: 3, precioUsd: 1500 }]);
+    expect(pedido.estado).toBe('por_revisar');
+  });
+
+  it('el panel cambia el estado solo por los pasos permitidos', async () => {
+    const almacen = crearAlmacenDemo(guardadoFalso());
+    const { numero } = await almacen.crearPedido([{ productoId: 'picador-verduras', cantidad: 1 }], envio, pago);
+    await expect(almacen.panel.cambiarEstado(numero, 'enviado')).rejects.toThrow(ErrorPedido);
+    await almacen.panel.cambiarEstado(numero, 'pagado');
+    await almacen.panel.cambiarEstado(numero, 'enviado');
+    expect((await almacen.panel.listarPedidos())[0].estado).toBe('enviado');
+  });
+
+  it('la tasa nueva se usa en los pedidos siguientes', async () => {
+    const almacen = crearAlmacenDemo(guardadoFalso());
+    await expect(almacen.panel.guardarTasa(0)).rejects.toThrow(ErrorPedido);
+    await almacen.panel.guardarTasa(300);
+    expect(await almacen.obtenerTasa()).toBe(300);
+    const pedido = await almacen.crearPedido([{ productoId: 'picador-verduras', cantidad: 1 }], envio, pago);
+    expect(pedido.totales.ves).toBe(1500 * 300);
+  });
 });

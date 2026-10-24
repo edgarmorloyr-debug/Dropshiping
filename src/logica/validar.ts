@@ -2,10 +2,16 @@ import type { DatosEnvio, DatosPago } from '../tipos';
 
 export type Errores = Partial<Record<keyof DatosEnvio | keyof DatosPago, string>>;
 
-/** Teléfonos móviles venezolanos: 0412, 0414, 0416, 0424, 0426 (+ 7 dígitos), con o sin +58. */
+/** Teléfonos móviles venezolanos: 0412, 0414, 0416, 0422, 0424, 0426 (+ 7 dígitos), con o sin +58. */
 export function telefonoValido(texto: string): boolean {
   const digitos = texto.replace(/[\s\-().]/g, '');
   return /^(?:\+?58|0)4(?:12|14|16|22|24|26)\d{7}$/.test(digitos);
+}
+
+/** «0414-123-4567» → «584141234567», como lo pide WhatsApp para abrir un chat. */
+export function telefonoInternacional(texto: string): string {
+  const digitos = texto.replace(/\D/g, '');
+  return digitos.startsWith('0') ? `58${digitos.slice(1)}` : digitos;
 }
 
 /** Cédula venezolana: V o E, seguida de 6 a 9 dígitos (los puntos son opcionales). */

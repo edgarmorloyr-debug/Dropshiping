@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cedulaValida, telefonoValido, validarEnvio, validarPago } from './validar';
+import { cedulaValida, telefonoInternacional, telefonoValido, validarEnvio, validarPago } from './validar';
 
 describe('telefonoValido', () => {
   it('acepta celulares venezolanos escritos de varias formas', () => {
@@ -11,6 +11,13 @@ describe('telefonoValido', () => {
     for (const t of ['0212-123-4567', '0414-123-456', '0430-123-4567', 'hola']) {
       expect(telefonoValido(t), t).toBe(false);
     }
+  });
+});
+
+describe('telefonoInternacional', () => {
+  it('cambia el 0 inicial por el 58 de Venezuela', () => {
+    expect(telefonoInternacional('0414-123-4567')).toBe('584141234567');
+    expect(telefonoInternacional('+58 424 123 4567')).toBe('584241234567');
   });
 });
 

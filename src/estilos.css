@@ -168,3 +168,10 @@ p { margin: 4px 0; }
 .exito { color: var(--exito); }
 .pasos { padding-left: 20px; }
 .pasos li { margin: 8px 0; }
+
+.pedido { background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio); padding: 12px; margin-bottom: 12px; }
+.pedido .caja-pago { margin: 8px 0; }
+.dos { display: flex; gap: 8px; }
+.dos .boton { margin-top: 8px; }
+.pestana { min-height: 48px; font: inherit; font-size: 14px; color: var(--tinta); cursor: pointer; }
+.pestana.elegida { border: 2px solid var(--tinta); font-weight: 700; }

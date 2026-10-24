@@ -57,3 +57,27 @@ export interface PedidoCreado {
   totales: Totales;
   metodoId: string;
 }
+
+export type EstadoPedido = 'por_revisar' | 'pagado' | 'enviado' | 'rechazado';
+
+/** Cada producto del pedido, con el nombre y el precio que tenía al momento de comprar. */
+export interface LineaGuardada {
+  productoId: string;
+  nombre: string;
+  cantidad: number;
+  precioUsd: Centavos;
+}
+
+export interface PedidoGuardado {
+  numero: number;
+  /** Fecha y hora en formato ISO (2026-10-24T21:35:15.676Z). */
+  creado: string;
+  estado: EstadoPedido;
+  lineas: LineaGuardada[];
+  envio: DatosEnvio;
+  metodoId: string;
+  referencia: string;
+  /** Ruta del comprobante en la carpeta privada (o su nombre, en la demostración). */
+  comprobante: string | null;
+  totales: Totales;
+}

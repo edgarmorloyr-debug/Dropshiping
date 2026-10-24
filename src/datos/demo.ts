@@ -1,7 +1,8 @@
-import { TIENDA } from '../config';
-import { calcularTotales } from '../logica/precios';
+import { METODOS_PAGO, TIENDA } from '../config';
+import { puedeCambiar } from '../logica/estados';
+import { calcularTotales, ErrorPedido } from '../logica/precios';
 import type { Almacen } from './almacen';
-import type { Producto } from '../tipos';
+import type { PedidoGuardado, Producto } from '../tipos';
 
 /** Productos de ejemplo: se reemplazan por los reales del catálogo de Dropi. */
 export const CATALOGO_EJEMPLO: Producto[] = [
@@ -44,53 +45,90 @@ export const CATALOGO_EJEMPLO: Producto[] = [
   },
 ];
 
-/** Tasa de ejemplo, solo para la demostración. */
+/** Tasa de ejemplo, solo para la demostración (la misma con la que arranca la base de datos). */
 export const TASA_EJEMPLO = 215.5;
 
-const CLAVE_PEDIDOS = 'tienda.demo.pedidos';
+const CLAVE_PEDIDOS = 'tienda.demo.pedidos.v2';
+const CLAVE_TASA = 'tienda.demo.tasa';
 
 type Guardado = Pick<Storage, 'getItem' | 'setItem'>;
 
 export function crearAlmacenDemo(guardado: Guardado | null): Almacen {
-  const memoria: unknown[] = [];
-  const leer = (): unknown[] => {
-    if (!guardado) return memoria;
+  // Sin almacenamiento del navegador (modo privado), todo vive en memoria mientras la página esté abierta.
+  const memoria = new Map<string, string>();
+  const leerTexto = (clave: string) => {
     try {
-      return JSON.parse(guardado.getItem(CLAVE_PEDIDOS) ?? '[]') as unknown[];
+      return guardado ? guardado.getItem(clave) : memoria.get(clave) ?? null;
+    } catch {
+      return memoria.get(clave) ?? null;
+    }
+  };
+  const escribirTexto = (clave: string, valor: string) => {
+    memoria.set(clave, valor);
+    try {
+      guardado?.setItem(clave, valor);
+    } catch {
+      // Se queda en memoria.
+    }
+  };
+  const leerPedidos = (): PedidoGuardado[] => {
+    try {
+      const datos = JSON.parse(leerTexto(CLAVE_PEDIDOS) ?? '[]');
+      return Array.isArray(datos) ? datos : [];
     } catch {
       return [];
     }
   };
-  const escribir = (pedidos: unknown[]) => {
-    if (!guardado) return;
-    try {
-      guardado.setItem(CLAVE_PEDIDOS, JSON.stringify(pedidos));
-    } catch {
-      // En modo privado puede fallar; la demostración sigue funcionando igual.
-    }
-  };
+  const escribirPedidos = (pedidos: PedidoGuardado[]) => escribirTexto(CLAVE_PEDIDOS, JSON.stringify(pedidos));
+  const tasa = () => Number(leerTexto(CLAVE_TASA)) || TASA_EJEMPLO;
 
   return {
     modo: 'demo',
     listarProductos: async () => CATALOGO_EJEMPLO,
-    obtenerTasa: async () => TASA_EJEMPLO,
+    obtenerTasa: async () => tasa(),
+
     async crearPedido(lineas, envio, pago) {
-      const totales = calcularTotales(lineas, CATALOGO_EJEMPLO, TASA_EJEMPLO, TIENDA.maxPorProducto);
-      const pedidos = leer();
-      const numero = pedidos.length + 1;
+      const totales = calcularTotales(lineas, CATALOGO_EJEMPLO, tasa(), TIENDA.maxPorProducto);
+      if (!METODOS_PAGO.some((m) => m.id === pago.metodoId)) throw new ErrorPedido('Esa forma de pago no está disponible.');
+      const pedidos = leerPedidos();
+      const numero = pedidos.reduce((mayor, p) => Math.max(mayor, p.numero), 0) + 1;
       pedidos.push({
         numero,
-        fecha: new Date().toISOString(),
+        creado: new Date().toISOString(),
         estado: 'por_revisar',
-        lineas,
+        lineas: lineas.map((l) => {
+          const producto = CATALOGO_EJEMPLO.find((p) => p.id === l.productoId)!;
+          return { productoId: l.productoId, nombre: producto.nombre, cantidad: l.cantidad, precioUsd: producto.precioUsd };
+        }),
         envio,
         metodoId: pago.metodoId,
         referencia: pago.referencia,
         comprobante: pago.comprobante?.name ?? null,
         totales,
       });
-      if (pedidos !== memoria) escribir(pedidos);
+      escribirPedidos(pedidos);
       return { numero, totales, metodoId: pago.metodoId };
+    },
+
+    panel: {
+      necesitaClave: false,
+      sesionActiva: async () => true,
+      entrar: async () => undefined,
+      salir: async () => undefined,
+      listarPedidos: async () => leerPedidos().sort((a, b) => b.numero - a.numero),
+      async cambiarEstado(numero, estado) {
+        const pedidos = leerPedidos();
+        const pedido = pedidos.find((p) => p.numero === numero);
+        if (!pedido) throw new ErrorPedido('Ese pedido no existe.');
+        if (!puedeCambiar(pedido.estado, estado)) throw new ErrorPedido('Ese cambio no se puede hacer en este pedido.');
+        pedido.estado = estado;
+        escribirPedidos(pedidos);
+      },
+      verComprobante: async () => null,
+      async guardarTasa(nueva) {
+        if (!(nueva > 0) || nueva > 1_000_000) throw new ErrorPedido('Escribe una tasa válida.');
+        escribirTexto(CLAVE_TASA, String(nueva));
+      },
     },
   };
 }

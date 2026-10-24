@@ -8,6 +8,7 @@ import { PaginaProducto } from './pantallas/Producto';
 import { PaginaCarrito } from './pantallas/Carrito';
 import { Pagar } from './pantallas/Pagar';
 import { Listo } from './pantallas/Listo';
+import { Panel } from './pantallas/Panel';
 
 /** Lee la dirección después de «#», por ejemplo «#/producto/picador» → ['producto', 'picador']. */
 function useRuta(): string[] {
@@ -33,8 +34,11 @@ export function App() {
 
   useEffect(() => {
     almacen.listarProductos().then(setProductos);
-    almacen.obtenerTasa().then(setTasa);
   }, []);
+  // La tasa se vuelve a leer al cambiar de pantalla, por si el dueño la actualizó en el panel.
+  useEffect(() => {
+    almacen.obtenerTasa().then(setTasa);
+  }, [ruta[0]]);
 
   let pantalla: React.ReactNode;
   if (!productos) {
@@ -59,6 +63,8 @@ export function App() {
         }}
       />
     );
+  } else if (ruta[0] === 'panel') {
+    pantalla = <Panel />;
   } else if (ruta[0] === 'listo' && pedido) {
     pantalla = <Listo pedido={pedido} />;
   } else {
