@@ -2,7 +2,7 @@
 
 ## En qué vamos
 
-**Paso 1 listo: boceto aprobado por el dueño (2026-10-24), en `bocetos/`. Base técnica elegida: Vercel + Supabase. Sigue: construir la tienda con productos de ejemplo mientras el dueño hace sus pendientes.**
+**Paso 3 (primera parte) listo para revisar: la tienda funciona en modo demostración (Inicio, Producto, Carrito, Pagar y Confirmación), con productos y datos de pago de ejemplo. Falta: panel privado de pedidos y conexión a Supabase.**
 
 ## Decisiones tomadas (2026-10-24)
 
@@ -23,6 +23,20 @@
 - Un pedido solo se envía al proveedor después de que el dueño marque «Pago confirmado».
 - Precios en dólares, con su equivalente en bolívares según la tasa del día.
 - Nunca se suben contraseñas ni claves al repositorio.
+
+## Cómo está hecha
+
+- `src/config.ts`: nombre, WhatsApp, días de entrega, empresas de envío y datos de cobro. **Todo lo que el dueño puede querer cambiar está aquí.**
+- `src/logica/`: cálculo de totales y bolívares (en centavos, sin decimales perdidos) y validación de teléfono y cédula venezolanos.
+- `src/datos/`: el «almacén». Hoy es de demostración (productos de ejemplo y pedidos guardados en el navegador). El de Supabase cumplirá el mismo contrato.
+- `src/pantallas/`: las pantallas del boceto aprobado.
+
+| Comando | Qué deberías ver |
+|---|---|
+| `npm test` | `Tests  20 passed` (o más) |
+| `npm run typecheck` | Nada (todo bien) |
+| `npm run build` | `built in …` |
+| `npm run dev` | Una dirección como `http://localhost:5173` |
 
 ## Hoja de ruta
 
