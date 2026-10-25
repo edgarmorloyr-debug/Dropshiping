@@ -2,7 +2,7 @@
 
 ## En qué vamos
 
-**Pasos 3, 4 y 5 aprobados por el dueño (2026-10-25): la tienda está publicada en https://dropshiping-wine.vercel.app conectada a Supabase (proyecto `tienda`), con panel privado en `#/panel`. Sigue: datos reales (nombre, datos de cobro, WhatsApp) y productos de Dropi.**
+**Pasos 3, 4 y 5 aprobados (2026-10-25). En revisión: «Datos de tu tienda» en el panel (nombre, WhatsApp y datos de cobro guardados en Supabase con `002_datos_tienda.sql`). Sigue: productos reales de Dropi.**
 
 ## Decisiones tomadas (2026-10-24)
 
@@ -18,6 +18,8 @@
 | Tienda en demostración | Aprobada tal cual (Inicio, Producto, Carrito, Pagar, Confirmación) | El dueño la probó en su teléfono desde Vercel |
 | Ramas | `claude/elegant-hawking-lv5prd` = pruebas; `main` = la que publica la tienda | Lo aprobado pasa a `main` con pruebas, typecheck y build en verde |
 | Panel y Supabase | Aprobados (2026-10-25). Variables en Vercel como «Config»: `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` (clave pública) | El dueño hizo una compra de prueba y la confirmó en el panel |
+| Datos personales | Nombre, WhatsApp y datos de cobro van en Supabase y se editan desde el panel; nunca en el código | El repositorio de GitHub es público (2026-10-25) |
+| Formas de pago visibles | Solo las que tienen todos sus datos llenos; la base de datos aplica la misma regla | Que nadie pague a datos incompletos o de ejemplo |
 | Proveedor | Dropi Venezuela, por confirmar | Hay que verificar si acepta pedidos ya pagados (trabaja sobre todo contra entrega) |
 
 ## Reglas
@@ -29,7 +31,8 @@
 
 ## Cómo está hecha
 
-- `src/config.ts`: nombre, WhatsApp, días de entrega, empresas de envío y datos de cobro. **Todo lo que el dueño puede querer cambiar está aquí.**
+- `src/config.ts`: días de entrega, empresas de envío, máximo por producto y qué datos pide cada forma de pago. El nombre, el WhatsApp y los datos de cobro **no** van aquí: el dueño los edita en el panel (Supabase).
+- `src/logica/cobro.ts`: qué formas de pago ve el cliente (solo las completas).
 - `src/logica/`: cálculo de totales y bolívares (en centavos, sin decimales perdidos) y validación de teléfono y cédula venezolanos.
 - `src/datos/`: el «almacén». Hoy es de demostración (productos de ejemplo y pedidos guardados en el navegador). El de Supabase cumplirá el mismo contrato.
 - `src/pantallas/`: las pantallas del boceto aprobado, más el panel (`Panel.tsx`, en `#/panel`).
@@ -44,7 +47,7 @@
 
 | Comando | Qué deberías ver |
 |---|---|
-| `npm test` | `Tests  44 passed` (o más) |
+| `npm test` | `Tests  54 passed` (o más) |
 | `npm run typecheck` | Nada (todo bien) |
 | `npm run build` | `built in …` |
 | `npm run dev` | Una dirección como `http://localhost:5173` |
@@ -61,7 +64,8 @@
 
 ## Cargado en Supabase (proyecto `tienda`)
 
-- `001_tienda.sql` y `hacerme_admin.sql` (2026-10-25). `revisar.sql` debe mostrar 2 filas OK.
+- `001_tienda.sql` y `hacerme_admin.sql` (2026-10-25).
+- Pendiente de pegar: `002_datos_tienda.sql`. Después, `revisar.sql` debe mostrar 4 filas OK (la de «formas de pago activas» se pone OK cuando el dueño llena sus datos en el panel).
 
 ## Pendiente del dueño
 
@@ -69,4 +73,4 @@
 
 - Crear una cuenta en Dropi Venezuela (app.dropi.com.ve) y preguntar si aceptan pedidos ya pagados.
 - Elegir el nombre de la tienda.
-- Tener a mano los datos de cobro que verán los clientes: Pago Móvil (banco, teléfono, cédula), correo de Zelle, usuario o ID de Binance, cuenta para transferencias y correo de PayPal.
+- Pegar `002_datos_tienda.sql` y llenar sus datos reales en el panel → «Datos de tu tienda».

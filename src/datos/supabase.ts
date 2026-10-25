@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { ErrorPedido } from '../logica/precios';
 import type { Almacen } from './almacen';
-import type { EstadoPedido, PedidoGuardado, Producto } from '../tipos';
+import type { DatosTienda, EstadoPedido, PedidoGuardado, Producto } from '../tipos';
 
 const RECARGAR = 'No pudimos conectarnos. Revisa tu internet e inténtalo otra vez.';
 
@@ -42,6 +42,12 @@ export function crearAlmacenSupabase(url: string, clave: string): Almacen {
       const { data, error } = await db.from('ajustes').select('tasa').single();
       revisar(error);
       return Number(data!.tasa);
+    },
+
+    async obtenerDatosTienda(): Promise<DatosTienda> {
+      const { data, error } = await db.from('ajustes').select('nombre_tienda, whatsapp, cobro').single();
+      revisar(error);
+      return { nombre: data!.nombre_tienda, whatsapp: data!.whatsapp, cobro: data!.cobro ?? {} };
     },
 
     async crearPedido(lineas, envio, pago) {
@@ -126,6 +132,13 @@ export function crearAlmacenSupabase(url: string, clave: string): Almacen {
 
       async guardarTasa(tasa) {
         const { error } = await db.rpc('guardar_tasa', { p_tasa: tasa });
+        revisar(error);
+      },
+
+      async guardarDatosTienda(datos) {
+        const { error } = await db.rpc('guardar_datos_tienda', {
+          p_nombre: datos.nombre, p_whatsapp: datos.whatsapp, p_cobro: datos.cobro,
+        });
         revisar(error);
       },
     },

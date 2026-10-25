@@ -1,4 +1,4 @@
-import type { DatosEnvio, DatosPago, EstadoPedido, LineaCarrito, PedidoCreado, PedidoGuardado, Producto } from '../tipos';
+import type { DatosEnvio, DatosPago, DatosTienda, EstadoPedido, LineaCarrito, PedidoCreado, PedidoGuardado, Producto } from '../tipos';
 import { crearAlmacenDemo } from './demo';
 import { crearAlmacenSupabase } from './supabase';
 
@@ -14,6 +14,8 @@ export interface AlmacenPanel {
   /** Dirección temporal para ver la foto del comprobante (o null si no hay). */
   verComprobante(pedido: PedidoGuardado): Promise<string | null>;
   guardarTasa(tasa: number): Promise<void>;
+  /** Nombre, WhatsApp y datos de cobro. Solo quedan activas las formas de pago con todos sus datos. */
+  guardarDatosTienda(datos: DatosTienda): Promise<void>;
 }
 
 /**
@@ -25,6 +27,8 @@ export interface Almacen {
   listarProductos(): Promise<Producto[]>;
   /** Bolívares por dólar del día. */
   obtenerTasa(): Promise<number>;
+  /** Nombre, WhatsApp y datos de cobro que el dueño puso en su panel. */
+  obtenerDatosTienda(): Promise<DatosTienda>;
   /** Guarda el pedido. El total lo calcula el almacén con sus propios precios, no el teléfono. */
   crearPedido(lineas: LineaCarrito[], envio: DatosEnvio, pago: DatosPago): Promise<PedidoCreado>;
   panel: AlmacenPanel;

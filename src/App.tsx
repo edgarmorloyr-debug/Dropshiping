@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { TIENDA } from './config';
 import { almacen } from './datos/almacen';
 import { useCarrito } from './carrito';
-import type { PedidoCreado, Producto } from './tipos';
+import { metodosActivos } from './logica/cobro';
+import type { DatosTienda, PedidoCreado, Producto } from './tipos';
 import { Inicio } from './pantallas/Inicio';
 import { PaginaProducto } from './pantallas/Producto';
 import { PaginaCarrito } from './pantallas/Carrito';
@@ -32,15 +32,23 @@ export function App() {
   const [tasa, setTasa] = useState<number | null>(null);
   const [pedido, setPedido] = useState<PedidoCreado | null>(null);
 
+  const [datos, setDatos] = useState<DatosTienda | null>(null);
   const [sinConexion, setSinConexion] = useState(false);
 
   useEffect(() => {
     almacen.listarProductos().then(setProductos, () => setSinConexion(true));
   }, []);
-  // La tasa se vuelve a leer al cambiar de pantalla, por si el dueño la actualizó en el panel.
+  // La tasa y los datos de la tienda se vuelven a leer al cambiar de pantalla, por si el dueño los cambió en el panel.
   useEffect(() => {
     almacen.obtenerTasa().then(setTasa, () => undefined);
+    almacen.obtenerDatosTienda().then(setDatos, () => setSinConexion(true));
   }, [ruta[0]]);
+  useEffect(() => {
+    if (datos) document.title = `${datos.nombre} · Hogar y cocina`;
+  }, [datos]);
+
+  const metodos = datos ? metodosActivos(datos) : [];
+  const whatsapp = datos?.whatsapp ?? '';
 
   let pantalla: React.ReactNode;
   if (ruta[0] === 'panel') {
@@ -53,13 +61,13 @@ export function App() {
         <button className="boton principal" onClick={() => window.location.reload()}>Volver a intentar</button>
       </section>
     );
-  } else if (!productos) {
+  } else if (!productos || !datos) {
     pantalla = <p className="seccion suave">Cargando…</p>;
   } else if (ruta[0] === 'producto') {
     const producto = productos.find((p) => p.id === ruta[1]);
     pantalla = producto
       ? <PaginaProducto producto={producto} tasa={tasa} carrito={carrito} />
-      : <Inicio productos={productos} tasa={tasa} />;
+      : <Inicio productos={productos} tasa={tasa} metodos={metodos} whatsapp={whatsapp} />;
   } else if (ruta[0] === 'carrito') {
     pantalla = <PaginaCarrito productos={productos} tasa={tasa} carrito={carrito} />;
   } else if (ruta[0] === 'pagar') {
@@ -67,6 +75,7 @@ export function App() {
       <Pagar
         productos={productos}
         tasa={tasa}
+        metodos={metodos}
         carrito={carrito}
         alTerminar={(p) => {
           setPedido(p);
@@ -76,9 +85,9 @@ export function App() {
       />
     );
   } else if (ruta[0] === 'listo' && pedido) {
-    pantalla = <Listo pedido={pedido} />;
+    pantalla = <Listo pedido={pedido} whatsapp={whatsapp} />;
   } else {
-    pantalla = <Inicio productos={productos} tasa={tasa} />;
+    pantalla = <Inicio productos={productos} tasa={tasa} metodos={metodos} whatsapp={whatsapp} />;
   }
 
   return (
@@ -89,7 +98,7 @@ export function App() {
         </div>
       )}
       <header className="encabezado">
-        <a className="marca" href="#/">{TIENDA.nombre}</a>
+        <a className="marca" href="#/">{datos?.nombre ?? ''}</a>
         <a className="boton-icono" href="#/carrito" aria-label={`Carrito, ${carrito.unidades} productos`}>
           <span aria-hidden="true">🛒</span>
           <span className="globo">{carrito.unidades}</span>

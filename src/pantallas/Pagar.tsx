@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { ESTADOS_VENEZUELA, METODOS_PAGO, TIENDA } from '../config';
+import { ESTADOS_VENEZUELA, TIENDA } from '../config';
 import { almacen } from '../datos/almacen';
 import { calcularTotales, ErrorPedido, formatear } from '../logica/precios';
 import { validarEnvio, validarPago, type Errores } from '../logica/validar';
 import type { Carrito } from '../carrito';
-import type { DatosEnvio, PedidoCreado, Producto } from '../tipos';
+import type { DatosEnvio, MetodoActivo, PedidoCreado, Producto } from '../tipos';
 
 const ENVIO_VACIO: DatosEnvio = {
   nombre: '', telefono: '', cedula: '', estado: '', ciudad: '', empresaEnvio: '', oficina: '',
@@ -42,9 +42,11 @@ function BotonCopiar({ texto }: { texto: string }) {
   );
 }
 
-export function Pagar({ productos, tasa, carrito, alTerminar }: {
+export function Pagar({ productos, tasa, metodos, carrito, alTerminar }: {
   productos: Producto[];
   tasa: number | null;
+  /** Solo las formas de pago con todos sus datos llenos. */
+  metodos: MetodoActivo[];
   carrito: Carrito;
   alTerminar: (p: PedidoCreado) => void;
 }) {
@@ -80,13 +82,13 @@ export function Pagar({ productos, tasa, carrito, alTerminar }: {
     );
   }
 
-  const metodo = METODOS_PAGO.find((m) => m.id === metodoId);
+  const metodo = metodos.find((m) => m.id === metodoId);
   // Después del primer intento, los avisos se recalculan en vivo: desaparecen al corregir el dato.
   const pago = { metodoId, referencia, comprobante };
   const errores: Errores = intentado
     ? {
         ...validarEnvio(envio, ESTADOS_VENEZUELA, TIENDA.empresasEnvio),
-        ...validarPago(pago, METODOS_PAGO.map((m) => m.id)),
+        ...validarPago(pago, metodos.map((m) => m.id)),
       }
     : {};
   const hayErrores = Object.keys(errores).length > 0;
@@ -100,7 +102,7 @@ export function Pagar({ productos, tasa, carrito, alTerminar }: {
     setIntentado(true);
     const encontrados = {
       ...validarEnvio(envio, ESTADOS_VENEZUELA, TIENDA.empresasEnvio),
-      ...validarPago(pago, METODOS_PAGO.map((m) => m.id)),
+      ...validarPago(pago, metodos.map((m) => m.id)),
     };
     if (Object.keys(encontrados).length > 0) return;
     setEnviando(true);
@@ -155,7 +157,10 @@ export function Pagar({ productos, tasa, carrito, alTerminar }: {
 
       <h2 style={{ marginTop: 24 }}>2. ¿Cómo vas a pagar?</h2>
       <div className="opciones" role="radiogroup" aria-label="Forma de pago">
-        {METODOS_PAGO.map((m) => (
+        {metodos.length === 0 && (
+          <p className="aviso-error">Esta tienda todavía no está recibiendo pagos. Escríbenos por WhatsApp.</p>
+        )}
+        {metodos.map((m) => (
           <label key={m.id} className={`opcion ${m.id === metodoId ? 'elegida' : ''}`}>
             <input type="radio" name="metodo" value={m.id} checked={m.id === metodoId} onChange={() => setMetodoId(m.id)} />
             {m.nombre}

@@ -2,7 +2,7 @@ import { METODOS_PAGO, TIENDA } from '../config';
 import { formatear } from '../logica/precios';
 import type { PedidoCreado } from '../tipos';
 
-export function Listo({ pedido }: { pedido: PedidoCreado }) {
+export function Listo({ pedido, whatsapp }: { pedido: PedidoCreado; whatsapp: string }) {
   const metodo = METODOS_PAGO.find((m) => m.id === pedido.metodoId);
   const mensaje = encodeURIComponent(`Hola, acabo de hacer el pedido #${pedido.numero} y pagué por ${metodo?.nombre ?? ''}.`);
 
@@ -19,10 +19,12 @@ export function Listo({ pedido }: { pedido: PedidoCreado }) {
         <li>Enviamos tu paquete a la oficina que elegiste. Llega en {TIENDA.diasEntrega.desde} a {TIENDA.diasEntrega.hasta} días.</li>
       </ol>
 
-      <a className="boton principal" href={`https://wa.me/${TIENDA.whatsapp}?text=${mensaje}`} target="_blank" rel="noreferrer">
-        Avísanos por WhatsApp
-      </a>
-      <a className="boton" href="#/">Volver a la tienda</a>
+      {whatsapp && (
+        <a className="boton principal" href={`https://wa.me/${whatsapp}?text=${mensaje}`} target="_blank" rel="noreferrer">
+          Avísanos por WhatsApp
+        </a>
+      )}
+      <a className={`boton ${whatsapp ? '' : 'principal'}`} href="#/">Volver a la tienda</a>
     </section>
   );
 }

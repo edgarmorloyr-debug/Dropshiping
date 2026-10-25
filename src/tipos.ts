@@ -20,8 +20,23 @@ export interface MetodoPago {
   nombre: string;
   /** En qué moneda paga el cliente con este método. */
   moneda: Moneda;
+  /** Qué datos pide al dueño (Banco, Teléfono…). */
+  campos: string[];
+}
+
+/** Una forma de pago con todos sus datos llenos: la que ve el cliente. */
+export interface MetodoActivo extends MetodoPago {
   /** Pares [etiqueta, valor] que el cliente ve para hacer el pago. */
   datos: [string, string][];
+}
+
+/** Lo que el dueño edita desde su panel. */
+export interface DatosTienda {
+  nombre: string;
+  /** Con código de país y solo dígitos: 584141234567. Vacío si aún no lo puso. */
+  whatsapp: string;
+  /** { pago_movil: { Banco: '…', Teléfono: '…', Cédula: '…' }, … } */
+  cobro: Record<string, Record<string, string>>;
 }
 
 export interface LineaCarrito {

@@ -1,8 +1,13 @@
-import { METODOS_PAGO, TIENDA } from '../config';
+import { TIENDA } from '../config';
 import { Imagen, Precio } from '../componentes/comunes';
-import type { Producto } from '../tipos';
+import type { MetodoActivo, Producto } from '../tipos';
 
-export function Inicio({ productos, tasa }: { productos: Producto[]; tasa: number | null }) {
+export function Inicio({ productos, tasa, metodos, whatsapp }: {
+  productos: Producto[];
+  tasa: number | null;
+  metodos: MetodoActivo[];
+  whatsapp: string;
+}) {
   const estrella = productos.find((p) => p.destacado) ?? productos[0];
   const otros = productos.filter((p) => p !== estrella);
   const { desde, hasta } = TIENDA.diasEntrega;
@@ -36,17 +41,23 @@ export function Inicio({ productos, tasa }: { productos: Producto[]; tasa: numbe
       )}
 
       <section className="seccion">
-        <h2>Pagas como prefieras</h2>
-        <div className="etiquetas">
-          {METODOS_PAGO.map((m) => <span key={m.id} className="etiqueta">{m.nombre}</span>)}
-        </div>
+        {metodos.length > 0 && (
+          <>
+            <h2>Pagas como prefieras</h2>
+            <div className="etiquetas">
+              {metodos.map((m) => <span key={m.id} className="etiqueta">{m.nombre}</span>)}
+            </div>
+          </>
+        )}
         <p className="suave" style={{ marginTop: 12 }}>
           📦 Envíos a toda Venezuela por {TIENDA.empresasEnvio.join(', ')}.
         </p>
         <p className="suave">✅ Confirmamos tu pago antes de enviar y te avisamos por WhatsApp.</p>
-        <a className="boton" href={`https://wa.me/${TIENDA.whatsapp}`} target="_blank" rel="noreferrer">
-          ¿Dudas? Escríbenos por WhatsApp
-        </a>
+        {whatsapp && (
+          <a className="boton" href={`https://wa.me/${whatsapp}`} target="_blank" rel="noreferrer">
+            ¿Dudas? Escríbenos por WhatsApp
+          </a>
+        )}
       </section>
     </>
   );

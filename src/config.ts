@@ -1,13 +1,10 @@
-// Todos los datos de la tienda que el dueño puede querer cambiar están aquí.
-// Ninguna otra parte del código escribe estos números a mano.
+// Datos fijos de la tienda. El nombre, el WhatsApp y los datos de cobro NO van aquí:
+// el dueño los edita desde su panel y se guardan en Supabase (así no quedan en GitHub).
 
 import type { MetodoPago } from './tipos';
 
 export const TIENDA = {
-  nombre: 'NOMBRE DE LA TIENDA',
   lema: 'Cosas útiles para tu hogar y tu cocina',
-  /** Número de WhatsApp con código de país, sin «+» ni espacios. */
-  whatsapp: '580000000000',
   /** Máximo de unidades de un mismo producto por pedido. */
   maxPorProducto: 5,
   /** Días que tarda en llegar un pedido (se muestra al cliente). */
@@ -15,52 +12,17 @@ export const TIENDA = {
   empresasEnvio: ['MRW', 'Zoom', 'Liberty Express'],
 } as const;
 
-/** Formas de pago. Los datos de cobro son de ejemplo hasta que el dueño ponga los suyos. */
+/**
+ * Formas de pago y qué datos pide cada una al dueño. Una forma de pago solo se muestra
+ * al cliente cuando el dueño llenó todos sus datos en el panel.
+ * Los id deben coincidir con los de guardar_datos_tienda (002_datos_tienda.sql).
+ */
 export const METODOS_PAGO: MetodoPago[] = [
-  {
-    id: 'pago_movil',
-    nombre: 'Pago Móvil',
-    moneda: 'VES',
-    datos: [
-      ['Banco', 'Banco de ejemplo (0000)'],
-      ['Teléfono', '0414-000-0000'],
-      ['Cédula', 'V-00.000.000'],
-    ],
-  },
-  {
-    id: 'zelle',
-    nombre: 'Zelle',
-    moneda: 'USD',
-    datos: [
-      ['Correo', 'pagos@ejemplo.com'],
-      ['A nombre de', 'Nombre de ejemplo'],
-    ],
-  },
-  {
-    id: 'binance',
-    nombre: 'Binance (USDT)',
-    moneda: 'USD',
-    datos: [
-      ['Binance Pay ID', '000000000'],
-      ['Moneda', 'USDT'],
-    ],
-  },
-  {
-    id: 'transferencia',
-    nombre: 'Transferencia',
-    moneda: 'VES',
-    datos: [
-      ['Banco', 'Banco de ejemplo'],
-      ['Cuenta', '0000-0000-00-0000000000'],
-      ['Titular', 'Nombre de ejemplo · V-00.000.000'],
-    ],
-  },
-  {
-    id: 'paypal',
-    nombre: 'PayPal',
-    moneda: 'USD',
-    datos: [['Correo', 'pagos@ejemplo.com']],
-  },
+  { id: 'pago_movil', nombre: 'Pago Móvil', moneda: 'VES', campos: ['Banco', 'Teléfono', 'Cédula'] },
+  { id: 'zelle', nombre: 'Zelle', moneda: 'USD', campos: ['Correo', 'A nombre de'] },
+  { id: 'binance', nombre: 'Binance (USDT)', moneda: 'USD', campos: ['Binance Pay ID o correo'] },
+  { id: 'transferencia', nombre: 'Transferencia', moneda: 'VES', campos: ['Banco', 'Número de cuenta', 'Titular', 'Cédula o RIF'] },
+  { id: 'paypal', nombre: 'PayPal', moneda: 'USD', campos: ['Correo'] },
 ];
 
 /** Los 24 estados de Venezuela, para que el cliente elija en vez de escribir. */

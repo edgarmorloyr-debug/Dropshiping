@@ -3,7 +3,8 @@ import { PGlite } from '@electric-sql/pglite';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { METODOS_PAGO, TIENDA } from '../config';
 import { calcularTotales } from '../logica/precios';
-import { CATALOGO_EJEMPLO } from './demo';
+import { metodosActivos } from '../logica/cobro';
+import { CATALOGO_EJEMPLO, DATOS_EJEMPLO } from './demo';
 import { SUPABASE_FALSO, como, leer } from './pruebas/supabaseFalso';
 
 const DUENO = '00000000-0000-0000-0000-00000000000a';
@@ -37,7 +38,15 @@ beforeAll(async () => {
   await db.query(`insert into auth.users values ($1, 'dueno@prueba.test')`, [DUENO]);
   await db.exec(leer('hacerme_admin.sql'));
   await db.query(`insert into auth.users values ($1, 'otro@prueba.test')`, [OTRO]);
+  await db.exec(leer('cambios/002_datos_tienda.sql'));
+  await guardarDatos(DATOS_EJEMPLO);
 }, 30_000);
+
+function guardarDatos(d: { nombre: string; whatsapp: string; cobro: unknown }, quien = DUENO) {
+  return como(db, quien, 'select public.guardar_datos_tienda($1, $2, $3)', [d.nombre, d.whatsapp, JSON.stringify(d.cobro)]);
+}
+const metodosDeLaBase = async () =>
+  (await como<{ metodos_pago: string[] }>(db, 'anon', 'select metodos_pago from public.ajustes'))[0].metodos_pago;
 
 describe('001 · tienda', () => {
   it('se puede ejecutar dos veces sin romper nada', async () => {
@@ -154,6 +163,64 @@ describe('001 · tienda', () => {
     } finally {
       await como(db, DUENO, 'select public.guardar_tasa(215.5)');
     }
+  });
+});
+
+describe('002 · datos de la tienda', () => {
+  it('se puede ejecutar dos veces sin romper nada ni borrar los datos guardados', async () => {
+    await expect(db.exec(leer('cambios/002_datos_tienda.sql'))).resolves.toBeDefined();
+    expect(await metodosDeLaBase()).toEqual(METODOS_PAGO.map((m) => m.id));
+  });
+
+  it('antes de que el dueño ponga sus datos, no hay formas de pago y no se aceptan pedidos', async () => {
+    const otra = new PGlite();
+    await otra.exec(SUPABASE_FALSO);
+    await otra.exec(leer('cambios/001_tienda.sql'));
+    await otra.exec(leer('cambios/002_datos_tienda.sql'));
+    const [a] = (await otra.query<{ metodos_pago: string[] }>('select metodos_pago from public.ajustes')).rows;
+    expect(a.metodos_pago).toEqual([]);
+    await otra.query(`insert into storage.objects (bucket_id, name) values ('comprobantes', 'pedidos/x.jpg')`);
+    await expect(otra.query('select * from public.crear_pedido($1, $2, $3, $4, $5)', [
+      JSON.stringify([{ productoId: 'picador-verduras', cantidad: 1 }]), JSON.stringify(envio), 'pago_movil', '123456', 'pedidos/x.jpg',
+    ])).rejects.toThrow('forma de pago');
+    await otra.close();
+  });
+
+  it('solo quedan activas las formas de pago completas, con la misma regla que la tienda', async () => {
+    const parcial = {
+      nombre: 'Mi Hogar', whatsapp: '584141234567',
+      cobro: {
+        pago_movil: { Banco: 'Banco X (0102)', Teléfono: '0414-000-0000', Cédula: 'V-1' },
+        zelle: { Correo: 'z@x.com', 'A nombre de': '' },
+        paypal: { Correo: 'p@x.com' },
+      },
+    };
+    try {
+      await guardarDatos(parcial);
+      expect(await metodosDeLaBase()).toEqual(metodosActivos(parcial).map((m) => m.id));
+      expect(await metodosDeLaBase()).toEqual(['pago_movil', 'paypal']);
+      const [publico] = await como<{ nombre_tienda: string; whatsapp: string }>(db, 'anon', 'select nombre_tienda, whatsapp from public.ajustes');
+      expect(publico).toEqual({ nombre_tienda: 'Mi Hogar', whatsapp: '584141234567' });
+      await expect(pedir([{ productoId: 'picador-verduras', cantidad: 1 }], { metodo: 'zelle' })).rejects.toThrow('forma de pago');
+    } finally {
+      await guardarDatos(DATOS_EJEMPLO);
+    }
+  });
+
+  it('solo el dueño los cambia, y rechaza datos inválidos', async () => {
+    await expect(guardarDatos(DATOS_EJEMPLO, OTRO)).rejects.toThrow('Solo el dueño');
+    await expect(guardarDatos({ ...DATOS_EJEMPLO, whatsapp: '0414-123' })).rejects.toThrow('WhatsApp');
+    await expect(guardarDatos({ ...DATOS_EJEMPLO, nombre: ' ' })).rejects.toThrow('nombre');
+    await expect(guardarDatos({ ...DATOS_EJEMPLO, cobro: { efectivo: { Monto: '1' } } })).rejects.toThrow('desconocida');
+    await expect(como(db, 'anon', `update public.ajustes set whatsapp = '1'`)).rejects.toThrow();
+  });
+});
+
+describe('revisar.sql', () => {
+  it('con todo cargado, todas las filas dicen OK', async () => {
+    const filas = (await db.query<{ cambio: string; estado: string }>(leer('revisar.sql'))).rows;
+    expect(filas.map((f) => f.cambio)).toEqual(['001 · tienda', '002 · datos de la tienda', 'formas de pago activas', 'administrador']);
+    expect(filas.every((f) => f.estado === 'OK')).toBe(true);
   });
 });
 

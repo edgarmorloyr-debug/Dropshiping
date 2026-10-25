@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CATALOGO_EJEMPLO, crearAlmacenDemo, TASA_EJEMPLO } from './demo';
+import { CATALOGO_EJEMPLO, crearAlmacenDemo, DATOS_EJEMPLO, TASA_EJEMPLO } from './demo';
 import { ErrorPedido } from '../logica/precios';
 
 const envio = {
@@ -66,5 +66,16 @@ describe('almacén de demostración', () => {
     expect(await almacen.obtenerTasa()).toBe(300);
     const pedido = await almacen.crearPedido([{ productoId: 'picador-verduras', cantidad: 1 }], envio, pago);
     expect(pedido.totales.ves).toBe(1500 * 300);
+  });
+
+  it('los datos de la tienda se guardan y una forma de pago incompleta deja de aceptarse', async () => {
+    const almacen = crearAlmacenDemo(guardadoFalso());
+    expect(await almacen.obtenerDatosTienda()).toEqual(DATOS_EJEMPLO);
+    await expect(almacen.panel.guardarDatosTienda({ ...DATOS_EJEMPLO, whatsapp: '0414' })).rejects.toThrow(ErrorPedido);
+    await almacen.panel.guardarDatosTienda({ ...DATOS_EJEMPLO, nombre: ' Mi Hogar ', cobro: { paypal: { Correo: 'p@x.com' } } });
+    expect((await almacen.obtenerDatosTienda()).nombre).toBe('Mi Hogar');
+    await expect(almacen.crearPedido([{ productoId: 'picador-verduras', cantidad: 1 }], envio, pago)).rejects.toThrow('forma de pago');
+    await expect(almacen.crearPedido([{ productoId: 'picador-verduras', cantidad: 1 }], envio, { ...pago, metodoId: 'paypal' }))
+      .resolves.toMatchObject({ numero: 1 });
   });
 });

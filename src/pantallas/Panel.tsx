@@ -4,7 +4,8 @@ import { almacen } from '../datos/almacen';
 import { NOMBRE_ESTADO, PASOS_PERMITIDOS } from '../logica/estados';
 import { ErrorPedido, formatear } from '../logica/precios';
 import { telefonoInternacional } from '../logica/validar';
-import type { EstadoPedido, PedidoGuardado } from '../tipos';
+import { metodosActivos, whatsappValido } from '../logica/cobro';
+import type { DatosTienda, EstadoPedido, PedidoGuardado } from '../tipos';
 
 const panel = almacen.panel;
 const PESTANAS: EstadoPedido[] = ['por_revisar', 'pagado', 'enviado', 'rechazado'];
@@ -162,11 +163,85 @@ function Tasa() {
   );
 }
 
+function DatosDeTienda({ inicial, alGuardar }: { inicial: DatosTienda; alGuardar: (d: DatosTienda) => void }) {
+  const [nombre, setNombre] = useState(inicial.nombre);
+  const [whatsapp, setWhatsapp] = useState(inicial.whatsapp);
+  const [cobro, setCobro] = useState(inicial.cobro);
+  const [aviso, setAviso] = useState('');
+  const [guardando, setGuardando] = useState(false);
+
+  const whatsappFinal = telefonoInternacional(whatsapp);
+  const activos = new Set(metodosActivos({ nombre, whatsapp: whatsappFinal, cobro }).map((m) => m.id));
+  const cambiarCampo = (metodo: string, campo: string, valor: string) => {
+    setCobro({ ...cobro, [metodo]: { ...cobro[metodo], [campo]: valor } });
+    setAviso('');
+  };
+
+  return (
+    <form
+      className="seccion"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        if (!whatsappValido(whatsappFinal)) {
+          setAviso('Escribe tu WhatsApp, por ejemplo 0414-123-4567.');
+          return;
+        }
+        // Se guardan todos los campos de cada forma de pago (vacíos incluidos), para que la base sepa cuáles están completas.
+        const completo: DatosTienda['cobro'] = Object.fromEntries(METODOS_PAGO.map((m) => [
+          m.id, Object.fromEntries(m.campos.map((c) => [c, (cobro[m.id]?.[c] ?? '').trim()])),
+        ]));
+        const datos = { nombre: nombre.trim(), whatsapp: whatsappFinal, cobro: completo };
+        setGuardando(true);
+        try {
+          await panel.guardarDatosTienda(datos);
+          alGuardar(datos);
+          setAviso('✓ Datos guardados. Tus clientes ya los ven.');
+        } catch (err) {
+          setAviso(mensaje(err));
+        }
+        setGuardando(false);
+      }}
+    >
+      <h2>Datos de tu tienda</h2>
+      <p className="suave">Tus clientes ven estos datos al pagar. Una forma de pago solo aparece si llenas todos sus datos.</p>
+      <label className="campo">
+        <span>Nombre de la tienda</span>
+        <input value={nombre} onChange={(e) => { setNombre(e.target.value); setAviso(''); }} maxLength={60} />
+      </label>
+      <label className="campo">
+        <span>Tu WhatsApp</span>
+        <input value={whatsapp} onChange={(e) => { setWhatsapp(e.target.value); setAviso(''); }} type="tel" inputMode="tel" placeholder="0414-123-4567" />
+      </label>
+
+      {METODOS_PAGO.map((m) => (
+        <fieldset key={m.id} className="grupo-cobro">
+          <legend>
+            {m.nombre}{' '}
+            <span className={activos.has(m.id) ? 'exito' : 'suave'}>
+              {activos.has(m.id) ? '· ✓ Visible para tus clientes' : '· Incompleto: no se muestra'}
+            </span>
+          </legend>
+          {m.campos.map((c) => (
+            <label key={c} className="campo">
+              <span>{c}</span>
+              <input value={cobro[m.id]?.[c] ?? ''} onChange={(e) => cambiarCampo(m.id, c, e.target.value)} maxLength={120} />
+            </label>
+          ))}
+        </fieldset>
+      ))}
+
+      {aviso && <p role="status" style={{ marginTop: 12 }}>{aviso}</p>}
+      <button className="boton" type="submit" disabled={guardando}>{guardando ? 'Guardando…' : 'Guardar datos de la tienda'}</button>
+    </form>
+  );
+}
+
 export function Panel() {
   const [sesion, setSesion] = useState<boolean | null>(null);
   const [pedidos, setPedidos] = useState<PedidoGuardado[] | null>(null);
   const [pestana, setPestana] = useState<EstadoPedido>('por_revisar');
   const [falla, setFalla] = useState('');
+  const [datos, setDatos] = useState<DatosTienda | null>(null);
 
   const cargar = useCallback(async () => {
     setFalla('');
@@ -181,7 +256,9 @@ export function Panel() {
     panel.sesionActiva().then(setSesion);
   }, []);
   useEffect(() => {
-    if (sesion) cargar();
+    if (!sesion) return;
+    cargar();
+    almacen.obtenerDatosTienda().then(setDatos, (e) => setFalla(mensaje(e)));
   }, [sesion, cargar]);
 
   if (sesion === null) return <p className="seccion suave">Cargando…</p>;
@@ -197,6 +274,9 @@ export function Panel() {
           <button className="enlace-boton" onClick={cargar}>Actualizar</button>
         </div>
         {!panel.necesitaClave && <p className="suave">En la demostración no hace falta contraseña.</p>}
+        {datos && metodosActivos(datos).length === 0 && (
+          <div className="aviso-error" role="alert">Tu tienda todavía no recibe pagos: llena tus datos de cobro en «Datos de tu tienda», más abajo.</div>
+        )}
         <div className="etiquetas" role="tablist" style={{ marginTop: 12 }}>
           {PESTANAS.map((e) => (
             <button
@@ -229,6 +309,8 @@ export function Panel() {
       </section>
 
       <Tasa />
+
+      {datos && <DatosDeTienda inicial={datos} alGuardar={setDatos} />}
 
       {panel.necesitaClave && (
         <section className="seccion">
