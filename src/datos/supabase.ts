@@ -92,7 +92,11 @@ export function crearAlmacenSupabase(url: string, clave: string): Almacen {
 
       async entrar(correo, clave) {
         const { error } = await db.auth.signInWithPassword({ email: correo.trim(), password: clave });
-        if (error) throw new ErrorPedido('Correo o contraseña incorrectos.');
+        if (error?.code === 'email_not_confirmed') {
+          throw new ErrorPedido('Tu correo aún no está confirmado en Supabase (Authentication → Users).');
+        }
+        if (error?.code === 'invalid_credentials') throw new ErrorPedido('Correo o contraseña incorrectos.');
+        if (error) throw new ErrorPedido(`No se pudo entrar: ${error.message}`);
         const { data: esAdmin } = await db.rpc('es_admin');
         if (esAdmin !== true) {
           await db.auth.signOut();
