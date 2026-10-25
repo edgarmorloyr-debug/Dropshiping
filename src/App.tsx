@@ -32,16 +32,28 @@ export function App() {
   const [tasa, setTasa] = useState<number | null>(null);
   const [pedido, setPedido] = useState<PedidoCreado | null>(null);
 
+  const [sinConexion, setSinConexion] = useState(false);
+
   useEffect(() => {
-    almacen.listarProductos().then(setProductos);
+    almacen.listarProductos().then(setProductos, () => setSinConexion(true));
   }, []);
   // La tasa se vuelve a leer al cambiar de pantalla, por si el dueño la actualizó en el panel.
   useEffect(() => {
-    almacen.obtenerTasa().then(setTasa);
+    almacen.obtenerTasa().then(setTasa, () => undefined);
   }, [ruta[0]]);
 
   let pantalla: React.ReactNode;
-  if (!productos) {
+  if (ruta[0] === 'panel') {
+    pantalla = <Panel />;
+  } else if (sinConexion) {
+    pantalla = (
+      <section className="seccion">
+        <h1>No pudimos cargar la tienda</h1>
+        <p className="suave">Revisa tu conexión a internet e inténtalo otra vez.</p>
+        <button className="boton principal" onClick={() => window.location.reload()}>Volver a intentar</button>
+      </section>
+    );
+  } else if (!productos) {
     pantalla = <p className="seccion suave">Cargando…</p>;
   } else if (ruta[0] === 'producto') {
     const producto = productos.find((p) => p.id === ruta[1]);
@@ -63,8 +75,6 @@ export function App() {
         }}
       />
     );
-  } else if (ruta[0] === 'panel') {
-    pantalla = <Panel />;
   } else if (ruta[0] === 'listo' && pedido) {
     pantalla = <Listo pedido={pedido} />;
   } else {
