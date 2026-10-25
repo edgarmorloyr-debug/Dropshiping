@@ -2,7 +2,7 @@
 
 ## En qué vamos
 
-**Paso 3 aprobado (2026-10-24); publicada en https://dropshiping-wine.vercel.app. Paso 4 listo para revisar: panel privado en `#/panel` y conexión a Supabase (`supabase/cambios/001_tienda.sql`). Sin las claves de Supabase todo sigue en modo demostración.**
+**Pasos 3, 4 y 5 aprobados por el dueño (2026-10-25): la tienda está publicada en https://dropshiping-wine.vercel.app conectada a Supabase (proyecto `tienda`), con panel privado en `#/panel`. Sigue: datos reales (nombre, datos de cobro, WhatsApp) y productos de Dropi.**
 
 ## Decisiones tomadas (2026-10-24)
 
@@ -17,6 +17,7 @@
 | Base técnica | Vercel (publicar la página) + Supabase (pedidos, comprobantes privados y acceso al panel), en un proyecto de Supabase aparte del de Knight Core | Gratis para empezar y el dueño ya conoce las dos |
 | Tienda en demostración | Aprobada tal cual (Inicio, Producto, Carrito, Pagar, Confirmación) | El dueño la probó en su teléfono desde Vercel |
 | Ramas | `claude/elegant-hawking-lv5prd` = pruebas; `main` = la que publica la tienda | Lo aprobado pasa a `main` con pruebas, typecheck y build en verde |
+| Panel y Supabase | Aprobados (2026-10-25). Variables en Vercel como «Config»: `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` (clave pública) | El dueño hizo una compra de prueba y la confirmó en el panel |
 | Proveedor | Dropi Venezuela, por confirmar | Hay que verificar si acepta pedidos ya pagados (trabaja sobre todo contra entrega) |
 
 ## Reglas
@@ -53,14 +54,19 @@
 1. Boceto de las pantallas: Inicio, Producto, Pagar y Panel de pedidos.
 2. Elegir de 2 a 3 productos con precios reales del catálogo de Dropi.
 3. Construir la tienda (catálogo, carrito, pago con referencia y comprobante).
-4. Construir el panel privado de pedidos. ✅ Hecho, esperando aprobación y que el dueño cargue Supabase.
-5. Publicarla en internet (Vercel). ✅ Publicada en modo demostración.
+4. Construir el panel privado de pedidos. ✅ Aprobado y conectado a Supabase.
+5. Publicarla en internet (Vercel). ✅ Publicada y conectada a Supabase.
 6. Probar con publicidad pequeña y quedarse con el producto que venda.
 7. Agregar Colombia.
 
+## Cargado en Supabase (proyecto `tienda`)
+
+- `001_tienda.sql` y `hacerme_admin.sql` (2026-10-25). `revisar.sql` debe mostrar 2 filas OK.
+
 ## Pendiente del dueño
+
+- En Vercel, hacer que la tienda se publique desde `main` (Settings → Environments → Production → Branch Tracking).
 
 - Crear una cuenta en Dropi Venezuela (app.dropi.com.ve) y preguntar si aceptan pedidos ya pagados.
 - Elegir el nombre de la tienda.
-- Crear un proyecto nuevo en Supabase para la tienda (los pasos se los da Claude).
 - Tener a mano los datos de cobro que verán los clientes: Pago Móvil (banco, teléfono, cédula), correo de Zelle, usuario o ID de Binance, cuenta para transferencias y correo de PayPal.
