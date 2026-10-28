@@ -1,15 +1,30 @@
 /** Dinero siempre en centavos (números enteros) para no perder céntimos al sumar. */
 export type Centavos = number;
 
+/** Un producto digital: curso, guía o plantillas. */
 export interface Producto {
   id: string;
+  /** Nombre corto, el que va en la portada. */
   nombre: string;
+  /** Titular con el beneficio: «Consigue tus primeros clientes…». */
+  titular: string;
+  /** Subtítulo que aclara el titular. */
   frase: string;
+  /** Tipo que se lee en la portada: «Guía práctica», «Plantillas», «Curso». */
+  etiqueta: string;
+  /** «Lo que vas a lograr». */
   beneficios: string[];
+  /** Lo que recibe, en pocas palabras: «45 páginas», «10 plantillas». */
+  incluye: string[];
+  /** Partes del contenido: título y detalle («8 págs.»). */
+  contenido: { titulo: string; detalle: string }[];
   precioUsd: Centavos;
-  /** Emoji que se usa como imagen mientras no haya fotos reales. */
-  icono: string;
-  color: string;
+  /** Precio de oferta y hasta cuándo dura (fecha ISO). Sin oferta: null. */
+  ofertaUsd: Centavos | null;
+  ofertaFin: string | null;
+  garantiaDias: number;
+  /** Dos colores para la portada, mientras no haya imagen subida. */
+  colores: [string, string];
   destacado?: boolean;
 }
 
@@ -44,14 +59,12 @@ export interface LineaCarrito {
   cantidad: number;
 }
 
-export interface DatosEnvio {
+/** A quién avisamos. Los productos digitales no necesitan dirección de envío. */
+export interface DatosCliente {
   nombre: string;
   telefono: string;
-  cedula: string;
-  estado: string;
-  ciudad: string;
-  empresaEnvio: string;
-  oficina: string;
+  /** Opcional. */
+  correo: string;
 }
 
 export interface DatosPago {
@@ -89,7 +102,7 @@ export interface PedidoGuardado {
   creado: string;
   estado: EstadoPedido;
   lineas: LineaGuardada[];
-  envio: DatosEnvio;
+  cliente: DatosCliente;
   metodoId: string;
   referencia: string;
   /** Ruta del comprobante en la carpeta privada (o su nombre, en la demostración). */

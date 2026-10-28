@@ -1,14 +1,12 @@
 import { useState } from 'react';
-import { ESTADOS_VENEZUELA, TIENDA } from '../config';
+import { TIENDA } from '../config';
 import { almacen } from '../datos/almacen';
+import { Portada, useAhora } from '../componentes/comunes';
+import { ofertaActiva, precioVigente } from '../logica/oferta';
 import { calcularTotales, ErrorPedido, formatear } from '../logica/precios';
-import { validarEnvio, validarPago, type Errores } from '../logica/validar';
+import { validarCliente, validarPago, type Errores } from '../logica/validar';
 import type { Carrito } from '../carrito';
-import type { DatosEnvio, MetodoActivo, PedidoCreado, Producto } from '../tipos';
-
-const ENVIO_VACIO: DatosEnvio = {
-  nombre: '', telefono: '', cedula: '', estado: '', ciudad: '', empresaEnvio: '', oficina: '',
-};
+import type { DatosCliente, MetodoActivo, PedidoCreado, Producto } from '../tipos';
 
 function Campo({ etiqueta, error, ayuda, children }: { etiqueta: string; error?: string; ayuda?: string; children: React.ReactNode }) {
   return (
@@ -50,7 +48,8 @@ export function Pagar({ productos, tasa, metodos, carrito, alTerminar }: {
   carrito: Carrito;
   alTerminar: (p: PedidoCreado) => void;
 }) {
-  const [envio, setEnvio] = useState<DatosEnvio>(ENVIO_VACIO);
+  const ahora = useAhora(10_000);
+  const [cliente, setCliente] = useState<DatosCliente>({ nombre: '', telefono: '', correo: '' });
   const [metodoId, setMetodoId] = useState('');
   const [referencia, setReferencia] = useState('');
   const [comprobante, setComprobante] = useState<File | null>(null);
@@ -72,7 +71,7 @@ export function Pagar({ productos, tasa, metodos, carrito, alTerminar }: {
   // Solo para mostrar: el total que vale es el que calcula el almacén al guardar.
   let totales;
   try {
-    totales = calcularTotales(carrito.lineas, productos, tasa, TIENDA.maxPorProducto);
+    totales = calcularTotales(carrito.lineas, productos, tasa, TIENDA.maxPorProducto, ahora);
   } catch (e) {
     return (
       <section className="seccion">
@@ -82,32 +81,29 @@ export function Pagar({ productos, tasa, metodos, carrito, alTerminar }: {
     );
   }
 
+  const enCarrito = carrito.lineas
+    .map((l) => productos.find((p) => p.id === l.productoId))
+    .filter((p): p is Producto => Boolean(p));
   const metodo = metodos.find((m) => m.id === metodoId);
   // Después del primer intento, los avisos se recalculan en vivo: desaparecen al corregir el dato.
   const pago = { metodoId, referencia, comprobante };
   const errores: Errores = intentado
-    ? {
-        ...validarEnvio(envio, ESTADOS_VENEZUELA, TIENDA.empresasEnvio),
-        ...validarPago(pago, metodos.map((m) => m.id)),
-      }
+    ? { ...validarCliente(cliente), ...validarPago(pago, metodos.map((m) => m.id)) }
     : {};
   const hayErrores = Object.keys(errores).length > 0;
   const montoMetodo = metodo ? formatear(metodo.moneda === 'USD' ? totales.usd : totales.ves, metodo.moneda) : '';
-  const cambiar = (campo: keyof DatosEnvio) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
-    setEnvio({ ...envio, [campo]: e.target.value });
+  const cambiar = (campo: keyof DatosCliente) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setCliente({ ...cliente, [campo]: e.target.value });
 
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
     setFalla('');
     setIntentado(true);
-    const encontrados = {
-      ...validarEnvio(envio, ESTADOS_VENEZUELA, TIENDA.empresasEnvio),
-      ...validarPago(pago, metodos.map((m) => m.id)),
-    };
+    const encontrados = { ...validarCliente(cliente), ...validarPago(pago, metodos.map((m) => m.id)) };
     if (Object.keys(encontrados).length > 0) return;
     setEnviando(true);
     try {
-      alTerminar(await almacen.crearPedido(carrito.lineas, envio, pago));
+      alTerminar(await almacen.crearPedido(carrito.lineas, cliente, pago));
     } catch (err) {
       setFalla(err instanceof ErrorPedido ? err.message : 'No pudimos enviar tu pedido. Revisa tu conexión e inténtalo otra vez.');
       setEnviando(false);
@@ -115,92 +111,100 @@ export function Pagar({ productos, tasa, metodos, carrito, alTerminar }: {
   }
 
   return (
-    <form className="seccion" onSubmit={enviar} noValidate>
-      <a className="boton-icono" href="#/carrito" style={{ marginLeft: -12 }}>← Volver</a>
-      <h1>Pagar</h1>
-      <div className="total" style={{ paddingTop: 0 }}>
-        <span>Total</span>
-        <span>{formatear(totales.usd, 'USD')}</span>
-      </div>
-      <p className="suave">
-        {formatear(totales.ves, 'VES')} · Tasa del día: {formatear(Math.round(tasa * 100), 'VES')} por $ · Envío incluido · Sin crear cuenta
-      </p>
+    <form onSubmit={enviar} noValidate>
+      <section className="seccion">
+        <a className="boton-icono" href="#/carrito" style={{ marginLeft: -12 }}>← Volver</a>
+        <div className="tarjeta">
+          {enCarrito.map((p) => (
+            <div key={p.id} className="resumen">
+              <Portada producto={p} tamano="mini" />
+              <div>
+                <b>{p.nombre}</b>
+                <div className="suave">{p.incluye.join(' · ')}</div>
+              </div>
+            </div>
+          ))}
+          {enCarrito.map((p) => (
+            <div key={p.id} className="fila-total">
+              <span>{ofertaActiva(p, ahora) ? 'Precio de oferta' : 'Precio'}{enCarrito.length > 1 ? ` · ${p.nombre}` : ''}</span>
+              <span>{formatear(precioVigente(p, ahora), 'USD')}</span>
+            </div>
+          ))}
+          <div className="fila-total total">
+            <span>Total</span>
+            <span>{formatear(totales.usd, 'USD')}</span>
+          </div>
+          <p className="suave" style={{ textAlign: 'right' }}>{formatear(totales.ves, 'VES')} al cambio de hoy</p>
+        </div>
+      </section>
 
-      <h2 style={{ marginTop: 24 }}>1. ¿A dónde te lo enviamos?</h2>
-      <Campo etiqueta="Nombre y apellido" error={errores.nombre}>
-        <input value={envio.nombre} onChange={cambiar('nombre')} autoComplete="name" />
-      </Campo>
-      <Campo etiqueta="Celular (WhatsApp)" error={errores.telefono} ayuda="Te avisamos por aquí cuando confirmemos tu pago.">
-        <input value={envio.telefono} onChange={cambiar('telefono')} type="tel" inputMode="tel" autoComplete="tel" placeholder="0414-123-4567" />
-      </Campo>
-      <Campo etiqueta="Cédula" error={errores.cedula} ayuda="La empresa de envío la pide para entregarte el paquete.">
-        <input value={envio.cedula} onChange={cambiar('cedula')} placeholder="V-12345678" autoCapitalize="characters" />
-      </Campo>
-      <Campo etiqueta="Estado" error={errores.estado}>
-        <select value={envio.estado} onChange={cambiar('estado')}>
-          <option value="">Elige tu estado</option>
-          {ESTADOS_VENEZUELA.map((e) => <option key={e}>{e}</option>)}
-        </select>
-      </Campo>
-      <Campo etiqueta="Ciudad" error={errores.ciudad}>
-        <input value={envio.ciudad} onChange={cambiar('ciudad')} autoComplete="address-level2" />
-      </Campo>
-      <Campo etiqueta="Empresa de envío" error={errores.empresaEnvio}>
-        <select value={envio.empresaEnvio} onChange={cambiar('empresaEnvio')}>
-          <option value="">Elige la empresa</option>
-          {TIENDA.empresasEnvio.map((e) => <option key={e}>{e}</option>)}
-        </select>
-      </Campo>
-      <Campo etiqueta="Oficina donde retiras el paquete" error={errores.oficina} ayuda="Por ejemplo: MRW Av. Bolívar Norte, Valencia.">
-        <input value={envio.oficina} onChange={cambiar('oficina')} />
-      </Campo>
+      <section className="seccion">
+        <h2>¿A dónde te avisamos?</h2>
+        <Campo etiqueta="Nombre" error={errores.nombre}>
+          <input value={cliente.nombre} onChange={cambiar('nombre')} autoComplete="name" />
+        </Campo>
+        <Campo etiqueta="WhatsApp" error={errores.telefono} ayuda="Te avisamos por aquí cuando confirmemos tu pago.">
+          <input value={cliente.telefono} onChange={cambiar('telefono')} type="tel" inputMode="tel" autoComplete="tel" placeholder="0414-123-4567" />
+        </Campo>
+        <Campo etiqueta="Correo (opcional)" error={errores.correo}>
+          <input value={cliente.correo} onChange={cambiar('correo')} type="email" inputMode="email" autoComplete="email" placeholder="tucorreo@gmail.com" />
+        </Campo>
+      </section>
 
-      <h2 style={{ marginTop: 24 }}>2. ¿Cómo vas a pagar?</h2>
-      <div className="opciones" role="radiogroup" aria-label="Forma de pago">
+      <section className="seccion">
+        <h2>¿Cómo pagas?</h2>
         {metodos.length === 0 && (
           <p className="aviso-error">Esta tienda todavía no está recibiendo pagos. Escríbenos por WhatsApp.</p>
         )}
-        {metodos.map((m) => (
-          <label key={m.id} className={`opcion ${m.id === metodoId ? 'elegida' : ''}`}>
-            <input type="radio" name="metodo" value={m.id} checked={m.id === metodoId} onChange={() => setMetodoId(m.id)} />
-            {m.nombre}
-            <span className="moneda">{m.moneda === 'USD' ? 'en dólares' : 'en bolívares'}</span>
-          </label>
-        ))}
-      </div>
-      {errores.metodoId && <div className="error">{errores.metodoId}</div>}
-
-      {metodo && (
-        <div className="caja-pago" aria-live="polite">
-          <p>Paga exactamente:</p>
-          <p className="monto-exacto">{montoMetodo}</p>
-          <p className="suave" style={{ marginBottom: 8 }}>a estos datos de {metodo.nombre}:</p>
-          {metodo.datos.map(([etiqueta, valor]) => (
-            <div key={etiqueta} className="dato">
-              <div className="valor">
-                <span className="etiqueta-dato">{etiqueta}</span>
-                {valor}
-              </div>
-              <BotonCopiar texto={valor} />
-            </div>
+        <div className="metodos" role="radiogroup" aria-label="Forma de pago">
+          {metodos.map((m) => (
+            <label key={m.id} className={`metodo ${m.id === metodoId ? 'elegido' : ''}`}>
+              <input type="radio" name="metodo" value={m.id} checked={m.id === metodoId} onChange={() => setMetodoId(m.id)} />
+              {m.nombre}
+            </label>
           ))}
         </div>
-      )}
+        {errores.metodoId && <div className="error">{errores.metodoId}</div>}
 
-      <h2 style={{ marginTop: 24 }}>3. Confirma tu pago</h2>
-      <Campo etiqueta="Número de referencia" error={errores.referencia} ayuda="Aparece en el comprobante que te da tu banco o app.">
-        <input value={referencia} onChange={(e) => setReferencia(e.target.value)} inputMode="text" />
-      </Campo>
-      <Campo etiqueta="Foto o captura del comprobante" error={errores.comprobante}>
-        <input type="file" accept="image/*,application/pdf" onChange={(e) => setComprobante(e.target.files?.[0] ?? null)} />
-      </Campo>
+        {metodo && (
+          <div className="caja-pago" aria-live="polite">
+            <div className="suave">Paga exactamente</div>
+            <div className="monto-exacto">{montoMetodo}</div>
+            {metodo.datos.map(([etiqueta, valor]) => (
+              <div key={etiqueta} className="dato">
+                <div className="valor">
+                  <span className="etiqueta-dato">{etiqueta}</span>
+                  {valor}
+                </div>
+                <BotonCopiar texto={valor} />
+              </div>
+            ))}
+          </div>
+        )}
 
-      {hayErrores && <div className="aviso-error" role="alert">Revisa los campos marcados en rojo.</div>}
-      {falla && <div className="aviso-error" role="alert">{falla}</div>}
-      <button className="boton principal" type="submit" disabled={enviando}>
-        {enviando ? 'Enviando…' : 'Enviar mi pedido'}
-      </button>
-      <p className="suave" style={{ marginTop: 8 }}>Revisamos tu pago y te avisamos por WhatsApp antes de enviar.</p>
+        <Campo etiqueta="Número de referencia" error={errores.referencia} ayuda="Aparece en el comprobante que te da tu banco o app.">
+          <input value={referencia} onChange={(e) => setReferencia(e.target.value)} placeholder="Ej. 004512" />
+        </Campo>
+        <div className={`campo ${errores.comprobante ? 'con-error' : ''}`}>
+          <span>Captura del pago</span>
+          <label className={`subir ${comprobante ? 'con-archivo' : ''}`}>
+            <input
+              type="file"
+              accept="image/*,application/pdf"
+              onChange={(e) => setComprobante(e.target.files?.[0] ?? null)}
+            />
+            {comprobante ? `✓ ${comprobante.name}` : '📎 Toca para subir la captura'}
+          </label>
+          {errores.comprobante && <div className="error">{errores.comprobante}</div>}
+        </div>
+
+        {hayErrores && <div className="aviso-error" role="alert">Revisa los campos marcados en rojo.</div>}
+        {falla && <div className="aviso-error" role="alert">{falla}</div>}
+        <button className="boton principal grande" type="submit" disabled={enviando}>
+          {enviando ? 'Enviando…' : 'Enviar mi pedido'}
+        </button>
+        <p className="seguro">🔒 Tus datos están protegidos · Sin crear cuenta</p>
+      </section>
     </form>
   );
 }

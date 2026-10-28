@@ -11,7 +11,7 @@ export const PASOS_PERMITIDOS: Record<EstadoPedido, EstadoPedido[]> = {
 export const NOMBRE_ESTADO: Record<EstadoPedido, string> = {
   por_revisar: 'Por revisar',
   pagado: 'Pagados',
-  enviado: 'Enviados',
+  enviado: 'Entregados',
   rechazado: 'Rechazados',
 };
 

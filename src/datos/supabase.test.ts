@@ -1,10 +1,10 @@
-// Prueba supabase/cambios/001_tienda.sql en un PostgreSQL de prueba que imita a Supabase.
+// Prueba supabase/cambios/001_tienda.sql y 002 en un PostgreSQL de prueba que imita a Supabase.
+// (Los productos digitales del 003 se prueban en digitales.test.ts.)
 import { PGlite } from '@electric-sql/pglite';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { METODOS_PAGO, TIENDA } from '../config';
-import { calcularTotales } from '../logica/precios';
+import { METODOS_PAGO } from '../config';
 import { metodosActivos } from '../logica/cobro';
-import { CATALOGO_EJEMPLO, DATOS_EJEMPLO } from './demo';
+import { DATOS_EJEMPLO } from './demo';
 import { SUPABASE_FALSO, como, leer } from './pruebas/supabaseFalso';
 
 const DUENO = '00000000-0000-0000-0000-00000000000a';
@@ -52,27 +52,26 @@ describe('001 · tienda', () => {
   it('se puede ejecutar dos veces sin romper nada', async () => {
     await expect(db.exec(leer('cambios/001_tienda.sql'))).resolves.toBeDefined();
     const [{ n }] = (await db.query<{ n: number }>('select count(*)::int as n from public.productos')).rows;
-    expect(n).toBe(CATALOGO_EJEMPLO.length);
+    expect(n).toBe(4);
   });
 
-  it('los productos y ajustes de la base coinciden con los de la tienda', async () => {
-    const productos = await como<Record<string, unknown>>(db, 'anon', 'select * from public.productos order by orden');
-    expect(productos.map((p) => ({
-      id: p.id, nombre: p.nombre, frase: p.frase, beneficios: p.beneficios, precioUsd: p.precio_usd,
-      icono: p.icono, color: p.color, destacado: p.destacado,
-    }))).toEqual(CATALOGO_EJEMPLO.map((p) => ({ ...p, destacado: Boolean(p.destacado) })));
-
+  it('carga sus 4 productos de ejemplo y los ajustes con las formas de pago de la tienda', async () => {
+    const productos = await como<{ id: string; precio_usd: number }>(db, 'anon', 'select id, precio_usd from public.productos order by orden');
+    expect(productos).toEqual([
+      { id: 'organizador-especias', precio_usd: 1800 }, { id: 'picador-verduras', precio_usd: 1500 },
+      { id: 'lampara-sensor', precio_usd: 1200 }, { id: 'bolsas-vacio', precio_usd: 2000 },
+    ]);
     const [ajustes] = await como<{ max_por_producto: number; metodos_pago: string[] }>(db, 'anon', 'select * from public.ajustes');
-    expect(ajustes.max_por_producto).toBe(TIENDA.maxPorProducto);
+    expect(ajustes.max_por_producto).toBe(5);
     expect(ajustes.metodos_pago).toEqual(METODOS_PAGO.map((m) => m.id));
   });
 
   it('un visitante crea un pedido y el total lo calcula la base, igual que la tienda', async () => {
     const lineas = [{ productoId: 'organizador-especias', cantidad: 2 }, { productoId: 'lampara-sensor', cantidad: 1 }];
     const creado = await pedir(lineas);
-    const esperado = calcularTotales(lineas, CATALOGO_EJEMPLO, 215.5, TIENDA.maxPorProducto);
-    expect(creado.total_usd).toBe(esperado.usd);
-    expect(Number(creado.total_ves)).toBe(esperado.ves);
+    // 2 × $18 + 1 × $12 = $48, a 215,5 Bs./$ = Bs. 10.344
+    expect(creado.total_usd).toBe(4800);
+    expect(Number(creado.total_ves)).toBe(1034400);
 
     const [guardado] = await como<{ lineas: unknown; cedula: string; estado: string }>(
       db, DUENO, 'select lineas, cedula, estado from public.pedidos where numero = $1', [creado.numero]);

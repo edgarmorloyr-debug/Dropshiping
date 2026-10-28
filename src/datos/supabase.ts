@@ -18,8 +18,7 @@ const EXTENSIONES: Record<string, string> = {
 
 type FilaPedido = {
   numero: number; creado: string; estado: EstadoPedido; lineas: PedidoGuardado['lineas'];
-  nombre: string; telefono: string; cedula: string; estado_ve: string; ciudad: string;
-  empresa_envio: string; oficina: string; metodo_id: string; referencia: string; comprobante: string;
+  nombre: string; telefono: string; correo: string | null; metodo_id: string; referencia: string; comprobante: string;
   total_usd: number; total_ves: number; tasa: number;
 };
 
@@ -33,8 +32,10 @@ export function crearAlmacenSupabase(url: string, clave: string): Almacen {
       const { data, error } = await db.from('productos').select('*').eq('activo', true).order('orden');
       revisar(error);
       return (data ?? []).map((p): Producto => ({
-        id: p.id, nombre: p.nombre, frase: p.frase, beneficios: p.beneficios, precioUsd: p.precio_usd,
-        icono: p.icono, color: p.color, destacado: p.destacado,
+        id: p.id, nombre: p.nombre, titular: p.titular, frase: p.frase, etiqueta: p.etiqueta,
+        beneficios: p.beneficios, incluye: p.incluye, contenido: p.contenido,
+        precioUsd: p.precio_usd, ofertaUsd: p.oferta_usd, ofertaFin: p.oferta_fin,
+        garantiaDias: p.garantia_dias, colores: [p.colores[0], p.colores[1]], destacado: p.destacado,
       }));
     },
 
@@ -50,7 +51,7 @@ export function crearAlmacenSupabase(url: string, clave: string): Almacen {
       return { nombre: data!.nombre_tienda, whatsapp: data!.whatsapp, cobro: data!.cobro ?? {} };
     },
 
-    async crearPedido(lineas, envio, pago) {
+    async crearPedido(lineas, cliente, pago) {
       if (!pago.comprobante) throw new ErrorPedido('Adjunta la foto o captura del comprobante.');
       const extension = EXTENSIONES[pago.comprobante.type];
       if (!extension) throw new ErrorPedido('El comprobante debe ser una foto o un PDF.');
@@ -64,9 +65,9 @@ export function crearAlmacenSupabase(url: string, clave: string): Almacen {
         throw new ErrorPedido('No pudimos subir el comprobante. Prueba con una foto de menos de 5 MB.');
       }
 
-      const { data, error } = await db.rpc('crear_pedido', {
+      const { data, error } = await db.rpc('crear_pedido_digital', {
         p_lineas: lineas.map(({ productoId, cantidad }) => ({ productoId, cantidad })),
-        p_envio: envio,
+        p_cliente: cliente,
         p_metodo: pago.metodoId,
         p_referencia: pago.referencia,
         p_comprobante: ruta,
@@ -113,10 +114,7 @@ export function crearAlmacenSupabase(url: string, clave: string): Almacen {
         revisar(error);
         return ((data ?? []) as FilaPedido[]).map((f): PedidoGuardado => ({
           numero: f.numero, creado: f.creado, estado: f.estado, lineas: f.lineas,
-          envio: {
-            nombre: f.nombre, telefono: f.telefono, cedula: f.cedula, estado: f.estado_ve,
-            ciudad: f.ciudad, empresaEnvio: f.empresa_envio, oficina: f.oficina,
-          },
+          cliente: { nombre: f.nombre, telefono: f.telefono, correo: f.correo ?? '' },
           metodoId: f.metodo_id, referencia: f.referencia, comprobante: f.comprobante,
           totales: { usd: f.total_usd, ves: Number(f.total_ves), tasa: Number(f.tasa) },
         }));

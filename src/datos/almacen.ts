@@ -1,4 +1,4 @@
-import type { DatosEnvio, DatosPago, DatosTienda, EstadoPedido, LineaCarrito, PedidoCreado, PedidoGuardado, Producto } from '../tipos';
+import type { DatosCliente, DatosPago, DatosTienda, EstadoPedido, LineaCarrito, PedidoCreado, PedidoGuardado, Producto } from '../tipos';
 import { crearAlmacenDemo } from './demo';
 import { crearAlmacenSupabase } from './supabase';
 
@@ -30,7 +30,7 @@ export interface Almacen {
   /** Nombre, WhatsApp y datos de cobro que el dueño puso en su panel. */
   obtenerDatosTienda(): Promise<DatosTienda>;
   /** Guarda el pedido. El total lo calcula el almacén con sus propios precios, no el teléfono. */
-  crearPedido(lineas: LineaCarrito[], envio: DatosEnvio, pago: DatosPago): Promise<PedidoCreado>;
+  crearPedido(lineas: LineaCarrito[], cliente: DatosCliente, pago: DatosPago): Promise<PedidoCreado>;
   panel: AlmacenPanel;
 }
 

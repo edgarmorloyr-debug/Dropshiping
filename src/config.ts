@@ -4,12 +4,8 @@
 import type { MetodoPago } from './tipos';
 
 export const TIENDA = {
-  lema: 'Cosas útiles para tu hogar y tu cocina',
-  /** Máximo de unidades de un mismo producto por pedido. */
-  maxPorProducto: 5,
-  /** Días que tarda en llegar un pedido (se muestra al cliente). */
-  diasEntrega: { desde: 2, hasta: 5 },
-  empresasEnvio: ['MRW', 'Zoom', 'Liberty Express'],
+  /** Productos digitales: se compra 1 de cada uno. Debe coincidir con ajustes.max_por_producto (003_digitales.sql). */
+  maxPorProducto: 1,
 } as const;
 
 /**
@@ -25,10 +21,22 @@ export const METODOS_PAGO: MetodoPago[] = [
   { id: 'paypal', nombre: 'PayPal', moneda: 'USD', campos: ['Correo'] },
 ];
 
-/** Los 24 estados de Venezuela, para que el cliente elija en vez de escribir. */
-export const ESTADOS_VENEZUELA = [
-  'Amazonas', 'Anzoátegui', 'Apure', 'Aragua', 'Barinas', 'Bolívar', 'Carabobo', 'Cojedes',
-  'Delta Amacuro', 'Distrito Capital', 'Falcón', 'Guárico', 'La Guaira', 'Lara', 'Mérida',
-  'Miranda', 'Monagas', 'Nueva Esparta', 'Portuguesa', 'Sucre', 'Táchira', 'Trujillo',
-  'Yaracuy', 'Zulia',
+/** Preguntas frecuentes que se muestran en cada producto. */
+export const PREGUNTAS = [
+  {
+    pregunta: '¿Cómo lo recibo?',
+    respuesta: 'Al terminar tu compra te damos un enlace privado. Apenas confirmamos tu pago, ahí mismo aparece el botón para descargar.',
+  },
+  {
+    pregunta: '¿Cuánto tardan en confirmar mi pago?',
+    respuesta: 'Revisamos cada pago a mano, normalmente en pocas horas. Si quieres que sea más rápido, avísanos por WhatsApp al terminar.',
+  },
+  {
+    pregunta: '¿Puedo pagar en bolívares?',
+    respuesta: 'Sí. Con Pago Móvil o transferencia pagas en bolívares, al cambio del día que te mostramos al pagar.',
+  },
+  {
+    pregunta: '¿Y si no me sirve?',
+    respuesta: 'Tienes garantía: escríbenos dentro del plazo y te devolvemos tu dinero por el mismo medio con que pagaste.',
+  },
 ];

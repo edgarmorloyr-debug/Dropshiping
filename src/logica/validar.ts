@@ -1,6 +1,6 @@
-import type { DatosEnvio, DatosPago } from '../tipos';
+import type { DatosCliente, DatosPago } from '../tipos';
 
-export type Errores = Partial<Record<keyof DatosEnvio | keyof DatosPago, string>>;
+export type Errores = Partial<Record<keyof DatosCliente | keyof DatosPago, string>>;
 
 /** Teléfonos móviles venezolanos: 0412, 0414, 0416, 0422, 0424, 0426 (+ 7 dígitos), con o sin +58. */
 export function telefonoValido(texto: string): boolean {
@@ -14,20 +14,16 @@ export function telefonoInternacional(texto: string): string {
   return digitos.startsWith('0') ? `58${digitos.slice(1)}` : digitos;
 }
 
-/** Cédula venezolana: V o E, seguida de 6 a 9 dígitos (los puntos son opcionales). */
-export function cedulaValida(texto: string): boolean {
-  return /^[VE]-?\d{6,9}$/i.test(texto.replace(/[\s.]/g, ''));
+/** Un correo con forma básica: algo@algo.algo, sin espacios. */
+export function correoValido(texto: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(texto.trim());
 }
 
-export function validarEnvio(d: DatosEnvio, estados: readonly string[], empresas: readonly string[]): Errores {
+export function validarCliente(c: DatosCliente): Errores {
   const e: Errores = {};
-  if (d.nombre.trim().split(/\s+/).length < 2) e.nombre = 'Escribe tu nombre y apellido.';
-  if (!telefonoValido(d.telefono)) e.telefono = 'Escribe un celular válido, por ejemplo 0414-123-4567.';
-  if (!cedulaValida(d.cedula)) e.cedula = 'Escribe tu cédula, por ejemplo V-12345678.';
-  if (!estados.includes(d.estado)) e.estado = 'Elige tu estado.';
-  if (d.ciudad.trim().length < 2) e.ciudad = 'Escribe tu ciudad.';
-  if (!empresas.includes(d.empresaEnvio)) e.empresaEnvio = 'Elige la empresa de envío.';
-  if (d.oficina.trim().length < 3) e.oficina = 'Escribe la oficina donde retiras el paquete.';
+  if (c.nombre.trim().length < 2) e.nombre = 'Escribe tu nombre.';
+  if (!telefonoValido(c.telefono)) e.telefono = 'Escribe un celular válido, por ejemplo 0414-123-4567.';
+  if (c.correo.trim() && !correoValido(c.correo)) e.correo = 'Revisa tu correo, por ejemplo maria@gmail.com.';
   return e;
 }
 

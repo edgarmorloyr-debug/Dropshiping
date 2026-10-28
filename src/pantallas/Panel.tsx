@@ -12,7 +12,7 @@ const PESTANAS: EstadoPedido[] = ['por_revisar', 'pagado', 'enviado', 'rechazado
 const BOTON: Record<EstadoPedido, string> = {
   pagado: 'Pago confirmado',
   rechazado: 'Rechazar',
-  enviado: 'Marcar enviado',
+  enviado: 'Marcar entregado',
   por_revisar: 'Volver a revisar',
 };
 
@@ -61,12 +61,12 @@ function TarjetaPedido({ pedido, alCambiar }: { pedido: PedidoGuardado; alCambia
   const [falla, setFalla] = useState('');
   const metodo = METODOS_PAGO.find((m) => m.id === pedido.metodoId);
   const monto = metodo?.moneda === 'VES' ? formatear(pedido.totales.ves, 'VES') : formatear(pedido.totales.usd, 'USD');
-  const { envio } = pedido;
-  const nombreCorto = envio.nombre.split(' ')[0];
+  const { cliente } = pedido;
+  const nombreCorto = cliente.nombre.split(' ')[0];
   const textoWhatsapp: Record<EstadoPedido, string> = {
     por_revisar: `Hola ${nombreCorto}, recibimos tu pedido #${pedido.numero}. Estamos revisando tu pago.`,
     pagado: `Hola ${nombreCorto}, confirmamos tu pago del pedido #${pedido.numero}. Te avisamos cuando lo enviemos.`,
-    enviado: `Hola ${nombreCorto}, tu pedido #${pedido.numero} ya va en camino por ${envio.empresaEnvio}.`,
+    enviado: `Hola ${nombreCorto}, tu pedido #${pedido.numero} ya está entregado. ¡Que lo disfrutes!`,
     rechazado: `Hola ${nombreCorto}, no pudimos confirmar el pago de tu pedido #${pedido.numero}. ¿Nos envías el comprobante otra vez?`,
   };
 
@@ -95,7 +95,7 @@ function TarjetaPedido({ pedido, alCambiar }: { pedido: PedidoGuardado; alCambia
 
   return (
     <article className="pedido">
-      <p><b>Pedido #{pedido.numero}</b> · {envio.nombre}</p>
+      <p><b>Pedido #{pedido.numero}</b> · {cliente.nombre}</p>
       <p className="suave">{new Date(pedido.creado).toLocaleString('es-VE', { dateStyle: 'medium', timeStyle: 'short' })}</p>
 
       <div className="caja-pago">
@@ -108,8 +108,7 @@ function TarjetaPedido({ pedido, alCambiar }: { pedido: PedidoGuardado; alCambia
         {pedido.lineas.map((l) => <li key={l.productoId}>{l.cantidad} × {l.nombre}</li>)}
       </ul>
       <p className="suave">
-        Cédula {envio.cedula} · {envio.telefono}<br />
-        {envio.empresaEnvio}: {envio.oficina}, {envio.ciudad} ({envio.estado})
+        WhatsApp {cliente.telefono}{cliente.correo && <> · {cliente.correo}</>}
       </p>
 
       {falla && <div className="aviso-error" role="alert">{falla}</div>}
@@ -122,7 +121,7 @@ function TarjetaPedido({ pedido, alCambiar }: { pedido: PedidoGuardado; alCambia
       </div>
       <a
         className="boton"
-        href={`https://wa.me/${telefonoInternacional(envio.telefono)}?text=${encodeURIComponent(textoWhatsapp[pedido.estado])}`}
+        href={`https://wa.me/${telefonoInternacional(cliente.telefono)}?text=${encodeURIComponent(textoWhatsapp[pedido.estado])}`}
         target="_blank"
         rel="noreferrer"
       >

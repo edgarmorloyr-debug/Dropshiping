@@ -1,48 +1,87 @@
 import { TIENDA } from '../config';
 import { metodosActivos, whatsappValido } from '../logica/cobro';
 import { puedeCambiar } from '../logica/estados';
+import { precioVigente } from '../logica/oferta';
 import { calcularTotales, ErrorPedido } from '../logica/precios';
 import type { Almacen } from './almacen';
 import type { DatosTienda, PedidoGuardado, Producto } from '../tipos';
 
-/** Productos de ejemplo: se reemplazan por los reales del catálogo de Dropi. */
+/** Fin de la oferta de ejemplo: 2 h 14 min 37 s después de abrir la demostración. */
+const FIN_OFERTA_EJEMPLO = new Date(Date.now() + (2 * 3600 + 14 * 60 + 37) * 1000).toISOString();
+
+/** Productos digitales de ejemplo (los mismos de 003_digitales.sql). El dueño los cambiará por los suyos. */
 export const CATALOGO_EJEMPLO: Producto[] = [
   {
-    id: 'organizador-especias',
-    nombre: 'Organizador giratorio de especias',
-    frase: 'Todas tus especias a la vista, en un solo giro',
-    beneficios: ['Ahorra espacio en el mesón', 'Gira 360° para encontrar todo rápido', 'Incluye 12 frascos con tapa'],
-    precioUsd: 1800,
-    icono: '🧂',
-    color: '#f4c27a',
+    id: 'guia-instagram',
+    nombre: 'Vende por Instagram desde cero',
+    titular: 'Consigue tus primeros clientes por Instagram en 14 días',
+    frase: 'El paso a paso, con plantillas listas para Canva, para que tu negocio venda aunque empieces con 0 seguidores.',
+    etiqueta: 'Guía práctica',
+    beneficios: [
+      'Un perfil que da confianza desde el primer vistazo',
+      '30 ideas de publicaciones que venden, listas para copiar',
+      'Cómo responder mensajes para cerrar la venta',
+      '10 plantillas editables en Canva',
+    ],
+    incluye: ['45 páginas', '10 plantillas'],
+    contenido: [
+      { titulo: 'Tu perfil que vende', detalle: '8 págs.' },
+      { titulo: 'Qué publicar cada semana', detalle: '12 págs.' },
+      { titulo: 'De mensaje a venta', detalle: '10 págs.' },
+      { titulo: 'Plantillas para Canva', detalle: '10 diseños' },
+    ],
+    precioUsd: 1200,
+    ofertaUsd: 900,
+    ofertaFin: FIN_OFERTA_EJEMPLO,
+    garantiaDias: 7,
+    colores: ['#4c1d95', '#be185d'],
     destacado: true,
   },
   {
-    id: 'picador-verduras',
-    nombre: 'Picador de verduras manual',
-    frase: 'Pica cebolla en segundos y sin lágrimas',
-    beneficios: ['3 cuchillas incluidas', 'Se lava fácil', 'Sin electricidad'],
-    precioUsd: 1500,
-    icono: '🧅',
-    color: '#9fd3a8',
+    id: 'plantillas-menu',
+    nombre: 'Plantillas de menú para tu negocio',
+    titular: 'Un menú bonito en 10 minutos, sin saber diseñar',
+    frase: 'Plantillas editables en Canva para restaurantes, panaderías y emprendimientos de comida.',
+    etiqueta: 'Plantillas',
+    beneficios: [
+      'Menús listos para imprimir o compartir por WhatsApp',
+      'Cambias precios y fotos en minutos',
+      'Diseños que se ven profesionales',
+    ],
+    incluye: ['20 plantillas', 'Canva'],
+    contenido: [
+      { titulo: 'Menús de una página', detalle: '8 diseños' },
+      { titulo: 'Menús para redes', detalle: '8 diseños' },
+      { titulo: 'Listas de precios', detalle: '4 diseños' },
+    ],
+    precioUsd: 800,
+    ofertaUsd: null,
+    ofertaFin: null,
+    garantiaDias: 7,
+    colores: ['#064e3b', '#f59e0b'],
   },
   {
-    id: 'lampara-sensor',
-    nombre: 'Lámpara LED con sensor de movimiento',
-    frase: 'Luz automática cuando se va la electricidad',
-    beneficios: ['Recargable por USB', 'Se pega sin taladro', 'Se enciende sola al pasar'],
-    precioUsd: 1200,
-    icono: '💡',
-    color: '#a9c4f5',
-  },
-  {
-    id: 'bolsas-vacio',
-    nombre: 'Set de bolsas al vacío (10 unidades)',
-    frase: 'Guarda la ropa en la mitad del espacio',
-    beneficios: ['Con bomba manual incluida', 'Protege de humedad y polvo', 'Reutilizables'],
-    precioUsd: 2000,
-    icono: '🧺',
-    color: '#d7b4ec',
+    id: 'finanzas-bolivares',
+    nombre: 'Finanzas en dólares y bolívares',
+    titular: 'Organiza tu dinero aunque cobres en dos monedas',
+    frase: 'Un método sencillo, con hoja de cálculo incluida, para saber cuánto gastas, ahorras y te queda.',
+    etiqueta: 'Guía + hoja de cálculo',
+    beneficios: [
+      'Saber a dónde se va tu dinero cada mes',
+      'Ahorrar en dólares aunque cobres en bolívares',
+      'Una hoja de cálculo que hace las cuentas por ti',
+    ],
+    incluye: ['32 páginas', '1 hoja de cálculo'],
+    contenido: [
+      { titulo: 'Tu foto financiera', detalle: '8 págs.' },
+      { titulo: 'Gastar en dos monedas', detalle: '12 págs.' },
+      { titulo: 'Tu plan de ahorro', detalle: '12 págs.' },
+    ],
+    precioUsd: 1000,
+    ofertaUsd: null,
+    ofertaFin: null,
+    garantiaDias: 7,
+    colores: ['#1e3a8a', '#0ea5e9'],
   },
 ];
 
@@ -62,7 +101,7 @@ export const DATOS_EJEMPLO: DatosTienda = {
   },
 };
 
-const CLAVE_PEDIDOS = 'tienda.demo.pedidos.v2';
+const CLAVE_PEDIDOS = 'tienda.demo.pedidos.v3';
 const CLAVE_TASA = 'tienda.demo.tasa';
 const CLAVE_DATOS = 'tienda.demo.datos';
 
@@ -110,8 +149,9 @@ export function crearAlmacenDemo(guardado: Guardado | null): Almacen {
     obtenerTasa: async () => tasa(),
     obtenerDatosTienda: async () => datosTienda(),
 
-    async crearPedido(lineas, envio, pago) {
-      const totales = calcularTotales(lineas, CATALOGO_EJEMPLO, tasa(), TIENDA.maxPorProducto);
+    async crearPedido(lineas, cliente, pago) {
+      const ahora = new Date();
+      const totales = calcularTotales(lineas, CATALOGO_EJEMPLO, tasa(), TIENDA.maxPorProducto, ahora);
       if (!metodosActivos(datosTienda()).some((m) => m.id === pago.metodoId)) {
         throw new ErrorPedido('Esa forma de pago no está disponible.');
       }
@@ -123,9 +163,9 @@ export function crearAlmacenDemo(guardado: Guardado | null): Almacen {
         estado: 'por_revisar',
         lineas: lineas.map((l) => {
           const producto = CATALOGO_EJEMPLO.find((p) => p.id === l.productoId)!;
-          return { productoId: l.productoId, nombre: producto.nombre, cantidad: l.cantidad, precioUsd: producto.precioUsd };
+          return { productoId: l.productoId, nombre: producto.nombre, cantidad: l.cantidad, precioUsd: precioVigente(producto, ahora) };
         }),
-        envio,
+        cliente: { ...cliente, correo: cliente.correo.trim() },
         metodoId: pago.metodoId,
         referencia: pago.referencia,
         comprobante: pago.comprobante?.name ?? null,

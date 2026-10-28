@@ -1,5 +1,6 @@
-import { TIENDA } from '../config';
-import { Imagen, Precio } from '../componentes/comunes';
+import { Cronometro, PrecioProducto, Portada, useAhora } from '../componentes/comunes';
+import { ofertaActiva, porcentajeDescuento, precioVigente } from '../logica/oferta';
+import { formatearCorto } from '../logica/precios';
 import type { MetodoActivo, Producto } from '../tipos';
 
 export function Inicio({ productos, tasa, metodos, whatsapp }: {
@@ -8,32 +9,54 @@ export function Inicio({ productos, tasa, metodos, whatsapp }: {
   metodos: MetodoActivo[];
   whatsapp: string;
 }) {
+  const ahora = useAhora();
   const estrella = productos.find((p) => p.destacado) ?? productos[0];
   const otros = productos.filter((p) => p !== estrella);
-  const { desde, hasta } = TIENDA.diasEntrega;
+
+  if (!estrella) {
+    return (
+      <section className="seccion">
+        <h1>Muy pronto</h1>
+        <p className="suave">Estamos preparando nuestros productos.</p>
+      </section>
+    );
+  }
 
   return (
     <>
-      {estrella && (
-        <section className="seccion">
-          <Imagen producto={estrella} />
-          <h1 style={{ marginTop: 16 }}>{estrella.frase}</h1>
-          <p>{estrella.nombre}</p>
-          <Precio usd={estrella.precioUsd} tasa={tasa} />
-          <p className="suave">Envío incluido · Llega en {desde} a {hasta} días</p>
-          <a className="boton principal" href={`#/producto/${estrella.id}`}>Ver producto</a>
-        </section>
+      {ofertaActiva(estrella, ahora) && estrella.ofertaFin && (
+        <div className="aviso-oferta" role="note">
+          🔥 Oferta −{porcentajeDescuento(estrella)} % termina en <Cronometro fin={estrella.ofertaFin} ahora={ahora} />
+        </div>
       )}
+      <section className="hero">
+        <Portada producto={estrella} />
+        <h1>{estrella.titular || estrella.nombre}</h1>
+        {estrella.frase && <p className="subtitulo">{estrella.frase}</p>}
+        <PrecioProducto producto={estrella} tasa={tasa} ahora={ahora} />
+      </section>
+      <section className="seccion">
+        <a className="boton principal grande" href={`#/producto/${estrella.id}`}>Ver qué incluye →</a>
+        <div className="confianza">
+          <div><span aria-hidden="true">⚡</span><b>Al instante</b>al confirmar tu pago</div>
+          <div><span aria-hidden="true">🛡️</span><b>Garantía</b>{estrella.garantiaDias} días</div>
+          <div><span aria-hidden="true">📱</span><b>Sin cuenta</b>compras en 2 minutos</div>
+        </div>
+      </section>
 
       {otros.length > 0 && (
         <section className="seccion">
-          <h2>Más para tu hogar</h2>
-          <div className="rejilla">
+          <h2>Más productos</h2>
+          <div className="lista-productos">
             {otros.map((p) => (
-              <a key={p.id} className="tarjeta" href={`#/producto/${p.id}`}>
-                <Imagen producto={p} tamano="chica" />
-                <h3>{p.nombre}</h3>
-                <Precio usd={p.precioUsd} tasa={null} />
+              <a key={p.id} className="tarjeta-producto" href={`#/producto/${p.id}`}>
+                <Portada producto={p} tamano="mini" />
+                <div className="tarjeta-producto-texto">
+                  <span className="etiqueta-tipo">{p.etiqueta}</span>
+                  <b>{p.nombre}</b>
+                  <span className="suave">{p.incluye.join(' · ')}</span>
+                </div>
+                <span className="tarjeta-producto-precio">{formatearCorto(precioVigente(p, ahora))}</span>
               </a>
             ))}
           </div>
@@ -49,10 +72,6 @@ export function Inicio({ productos, tasa, metodos, whatsapp }: {
             </div>
           </>
         )}
-        <p className="suave" style={{ marginTop: 12 }}>
-          📦 Envíos a toda Venezuela por {TIENDA.empresasEnvio.join(', ')}.
-        </p>
-        <p className="suave">✅ Confirmamos tu pago antes de enviar y te avisamos por WhatsApp.</p>
         {whatsapp && (
           <a className="boton" href={`https://wa.me/${whatsapp}`} target="_blank" rel="noreferrer">
             ¿Dudas? Escríbenos por WhatsApp

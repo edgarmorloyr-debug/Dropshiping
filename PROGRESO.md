@@ -2,7 +2,7 @@
 
 ## En qué vamos
 
-**Cambio de rumbo (2026-10-28): la tienda venderá productos digitales (cursos, guías, plantillas) con entrega automática, y más adelante productos importados. Ya no se venden productos locales de Dropi. En curso: boceto de los productos digitales (con muestra, garantía, opiniones, cupones y oferta con cronómetro), esperando aprobación. Pendiente: el panel da «Failed to fetch» (revisar `VITE_SUPABASE_URL` en Vercel).**
+**Productos digitales, Parte 1 de 5 lista para revisar (2026-10-28): diseño nuevo aprobado, página del producto (oferta con cronómetro real, garantía, qué incluye, contenido, preguntas frecuentes, barra de compra fija) y pago sin dirección. SQL nuevo: `003_digitales.sql`. Siguen: Parte 2 «Mi pedido» con descarga automática, Parte 3 productos desde el panel (portada, archivos, muestra), Parte 4 cupones, Parte 5 opiniones. Pendiente: el panel da «Failed to fetch» (revisar `VITE_SUPABASE_URL` en Vercel).**
 
 ## Decisiones tomadas (2026-10-24)
 
@@ -29,6 +29,8 @@
 | Para vender más | Muestra gratis, garantía de devolución (7 días), opiniones con número de ventas, cupones y oferta por tiempo limitado con cronómetro | Elección del dueño (2026-10-28), copiando lo que funciona en Hotmart y Gumroad |
 | Cronómetro | Real: el dueño pone la fecha y hora de fin, igual para todos; el servidor cobra el precio normal si ya terminó. Nunca un cronómetro falso que se reinicia | Uno falso es publicidad engañosa y destruye la confianza |
 | Opiniones | Solo de compras verificadas; el dueño decide cuáles se publican | Que no haya opiniones inventadas |
+| Diseño | Aprobado (2026-10-28): `bocetos/digitales-real.html` (estilo Hotmart / Stan Store: portada 3D, precio antes/ahora, sellos de confianza, barra de compra fija) | El dueño pidió que no se viera artificial |
+| Un botón naranja | La barra de compra fija solo aparece cuando el botón grande ya no se ve | Regla de diseño: una acción principal a la vista |
 | Correo automático | Más adelante (necesita un servicio aparte). Al inicio el enlace se muestra en pantalla y por WhatsApp | Empezar sin costos extra |
 
 ## Reglas
@@ -42,6 +44,8 @@
 
 - `src/config.ts`: días de entrega, empresas de envío, máximo por producto y qué datos pide cada forma de pago. El nombre, el WhatsApp y los datos de cobro **no** van aquí: el dueño los edita en el panel (Supabase).
 - `src/logica/cobro.ts`: qué formas de pago ve el cliente (solo las completas).
+- `src/logica/oferta.ts`: precio vigente (oferta solo antes de su fin), % de descuento y tiempo restante del cronómetro.
+- `supabase/cambios/003_digitales.sql`: ficha del producto digital, oferta con fin real, pedidos sin dirección (nombre, WhatsApp, correo opcional) y código secreto `token` para «Mi pedido». Probado en `src/datos/digitales.test.ts`.
 - `src/logica/`: cálculo de totales y bolívares (en centavos, sin decimales perdidos) y validación de teléfono y cédula venezolanos.
 - `src/datos/`: el «almacén». Hoy es de demostración (productos de ejemplo y pedidos guardados en el navegador). El de Supabase cumplirá el mismo contrato.
 - `src/pantallas/`: las pantallas del boceto aprobado, más el panel (`Panel.tsx`, en `#/panel`).
@@ -60,7 +64,7 @@
 
 | Comando | Qué deberías ver |
 |---|---|
-| `npm test` | `Tests  54 passed` (o más) |
+| `npm test` | `Tests  70 passed` (o más) |
 | `npm run typecheck` | Nada (todo bien) |
 | `npm run build` | `built in …` |
 | `npm run dev` | Una dirección como `http://localhost:5173` |
@@ -89,4 +93,4 @@
 - Preguntar a CJ Dropshipping si envía a Venezuela, con qué empresa y en cuántos días.
 - Tener listos los primeros cursos o guías (propios o con licencia de reventa).
 - Elegir el nombre de la tienda.
-- Pegar `002_datos_tienda.sql` y llenar sus datos reales en el panel → «Datos de tu tienda».
+- Pegar `002_datos_tienda.sql` y `003_digitales.sql` (en ese orden) y llenar sus datos reales en el panel → «Datos de tu tienda».

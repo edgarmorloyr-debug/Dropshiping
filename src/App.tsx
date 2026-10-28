@@ -66,7 +66,7 @@ export function App() {
   } else if (ruta[0] === 'producto') {
     const producto = productos.find((p) => p.id === ruta[1]);
     pantalla = producto
-      ? <PaginaProducto producto={producto} tasa={tasa} carrito={carrito} />
+      ? <PaginaProducto producto={producto} tasa={tasa} metodos={metodos} carrito={carrito} />
       : <Inicio productos={productos} tasa={tasa} metodos={metodos} whatsapp={whatsapp} />;
   } else if (ruta[0] === 'carrito') {
     pantalla = <PaginaCarrito productos={productos} tasa={tasa} carrito={carrito} />;
@@ -98,7 +98,10 @@ export function App() {
         </div>
       )}
       <header className="encabezado">
-        <a className="marca" href="#/">{datos?.nombre ?? ''}</a>
+        <a className="marca" href="#/">
+          {datos && <span className="logo" aria-hidden="true">{datos.nombre.trim().charAt(0).toUpperCase()}</span>}
+          {datos?.nombre ?? ''}
+        </a>
         <a className="boton-icono" href="#/carrito" aria-label={`Carrito, ${carrito.unidades} productos`}>
           <span aria-hidden="true">🛒</span>
           <span className="globo">{carrito.unidades}</span>

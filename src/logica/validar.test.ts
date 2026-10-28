@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cedulaValida, telefonoInternacional, telefonoValido, validarEnvio, validarPago } from './validar';
+import { correoValido, telefonoInternacional, telefonoValido, validarCliente, validarPago } from './validar';
 
 describe('telefonoValido', () => {
   it('acepta celulares venezolanos escritos de varias formas', () => {
@@ -21,32 +21,18 @@ describe('telefonoInternacional', () => {
   });
 });
 
-describe('cedulaValida', () => {
-  it('acepta V o E con o sin guion y puntos', () => {
-    for (const c of ['V-12345678', 'v12.345.678', 'E-8123456']) expect(cedulaValida(c), c).toBe(true);
-  });
-  it('rechaza sin letra o muy corta', () => {
-    for (const c of ['12345678', 'V-123', 'J-12345678']) expect(cedulaValida(c), c).toBe(false);
+describe('correoValido', () => {
+  it('acepta correos normales y rechaza los incompletos', () => {
+    expect(correoValido('maria@gmail.com')).toBe(true);
+    for (const c of ['maria', 'maria@', 'maria@gmail', 'ma ria@gmail.com']) expect(correoValido(c), c).toBe(false);
   });
 });
 
-const envioBueno = {
-  nombre: 'María Pérez', telefono: '0414-123-4567', cedula: 'V-12345678', estado: 'Carabobo',
-  ciudad: 'Valencia', empresaEnvio: 'MRW', oficina: 'MRW Av. Bolívar Norte',
-};
-
-describe('validarEnvio', () => {
-  it('no marca errores si todo está bien', () => {
-    expect(validarEnvio(envioBueno, ['Carabobo'], ['MRW'])).toEqual({});
-  });
-  it('marca cada campo que falta', () => {
-    const e = validarEnvio(
-      { nombre: 'María', telefono: '', cedula: '', estado: '', ciudad: '', empresaEnvio: '', oficina: '' },
-      ['Carabobo'], ['MRW'],
-    );
-    expect(Object.keys(e).sort()).toEqual(
-      ['cedula', 'ciudad', 'empresaEnvio', 'estado', 'nombre', 'oficina', 'telefono'],
-    );
+describe('validarCliente', () => {
+  it('pide nombre y celular; el correo es opcional pero, si lo escribe, debe estar bien', () => {
+    expect(validarCliente({ nombre: 'María', telefono: '0414-123-4567', correo: '' })).toEqual({});
+    expect(Object.keys(validarCliente({ nombre: '', telefono: '0212', correo: 'maria@' })).sort())
+      .toEqual(['correo', 'nombre', 'telefono']);
   });
 });
 
