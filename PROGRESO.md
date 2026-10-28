@@ -2,7 +2,7 @@
 
 ## En qué vamos
 
-**Pasos 3, 4 y 5 aprobados (2026-10-25). En revisión: «Datos de tu tienda» en el panel (nombre, WhatsApp y datos de cobro guardados en Supabase con `002_datos_tienda.sql`). Sigue: productos reales de Dropi.**
+**Cambio de rumbo (2026-10-28): la tienda venderá productos digitales (cursos, guías, plantillas) con entrega automática, y más adelante productos importados. Ya no se venden productos locales de Dropi. En curso: boceto de los productos digitales. Pendiente: el panel da «Failed to fetch» (revisar `VITE_SUPABASE_URL` en Vercel).**
 
 ## Decisiones tomadas (2026-10-24)
 
@@ -12,7 +12,7 @@
 | País | Venezuela primero; Colombia después | Elección del dueño |
 | Cobro | Solo pago en línea, verificado a mano en un panel privado | En Venezuela no hay cobro automático con tarjeta (Stripe y Mercado Pago no operan ahí) |
 | Formas de pago | Pago Móvil, Zelle, Binance (USDT), transferencia bancaria y PayPal | Elección del dueño. PayPal cobra cerca del 5,4 % más un monto fijo |
-| Tema | Hogar y cocina | Cavecom-e: lo más vendido por internet en Venezuela (dato de 2024) |
+| Tema | ~~Hogar y cocina~~ → Productos digitales e importados (2026-10-28) | Decisión del dueño: «nosotros solo somos intermediarios» |
 | Boceto | Aprobado tal cual: Inicio, Producto, Pagar sin crear cuenta y panel privado | Precio final visible desde el inicio y sin registro obligatorio (las dos causas principales de abandono según Baymard) |
 | Base técnica | Vercel (publicar la página) + Supabase (pedidos, comprobantes privados y acceso al panel), en un proyecto de Supabase aparte del de Knight Core | Gratis para empezar y el dueño ya conoce las dos |
 | Tienda en demostración | Aprobada tal cual (Inicio, Producto, Carrito, Pagar, Confirmación) | El dueño la probó en su teléfono desde Vercel |
@@ -20,7 +20,11 @@
 | Panel y Supabase | Aprobados (2026-10-25). Variables en Vercel como «Config»: `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` (clave pública) | El dueño hizo una compra de prueba y la confirmó en el panel |
 | Datos personales | Nombre, WhatsApp y datos de cobro van en Supabase y se editan desde el panel; nunca en el código | El repositorio de GitHub es público (2026-10-25) |
 | Formas de pago visibles | Solo las que tienen todos sus datos llenos; la base de datos aplica la misma regla | Que nadie pague a datos incompletos o de ejemplo |
-| Proveedor | Dropi Venezuela, por confirmar | Hay que verificar si acepta pedidos ya pagados (trabaja sobre todo contra entrega) |
+| Proveedor | ~~Dropi Venezuela~~ → ya no se usa (2026-10-28) | Ya no se venden productos locales |
+| Productos digitales | Cursos, guías o plantillas (propios o con licencia de reventa) | Elección del dueño (2026-10-28). Sin licencia sería piratería |
+| Entrega digital | Automática: al tocar «Pago confirmado», el cliente puede descargar desde el enlace secreto de su pedido | Elección del dueño. El pago en Venezuela (Pago Móvil, Zelle…) no se puede confirmar solo; todo lo de después sí |
+| Importados | «La forma que se pueda automatizar»: CJ Dropshipping tiene conexión para mandar pedidos solos, pero falta confirmar que envíe a Venezuela | Decisión del dueño (2026-10-28) |
+| Orden | Primero digitales, después importados | Elección del dueño (2026-10-28) |
 
 ## Reglas
 
@@ -58,13 +62,15 @@
 
 ## Hoja de ruta
 
-1. Boceto de las pantallas: Inicio, Producto, Pagar y Panel de pedidos.
-2. Elegir de 2 a 3 productos con precios reales del catálogo de Dropi.
-3. Construir la tienda (catálogo, carrito, pago con referencia y comprobante).
+1. Boceto de las pantallas: Inicio, Producto, Pagar y Panel de pedidos. ✅
+2. ~~Elegir productos de Dropi~~ (cambio de rumbo 2026-10-28).
+3. Construir la tienda (catálogo, carrito, pago con referencia y comprobante). ✅
 4. Construir el panel privado de pedidos. ✅ Aprobado y conectado a Supabase.
 5. Publicarla en internet (Vercel). ✅ Publicada y conectada a Supabase.
-6. Probar con publicidad pequeña y quedarse con el producto que venda.
-7. Agregar Colombia.
+6. Productos digitales: boceto → productos y archivos desde el panel → enlace secreto «Mi pedido» con descarga automática.
+7. Productos importados (CJ Dropshipping, si envía a Venezuela).
+8. Probar con publicidad pequeña y quedarse con lo que venda.
+9. Agregar Colombia.
 
 ## Cargado en Supabase (proyecto `tienda`)
 
@@ -75,6 +81,7 @@
 
 - En Vercel, hacer que la tienda se publique desde `main` (Settings → Environments → Production → Branch Tracking).
 
-- Crear una cuenta en Dropi Venezuela (app.dropi.com.ve) y preguntar si aceptan pedidos ya pagados.
+- Preguntar a CJ Dropshipping si envía a Venezuela, con qué empresa y en cuántos días.
+- Tener listos los primeros cursos o guías (propios o con licencia de reventa).
 - Elegir el nombre de la tienda.
 - Pegar `002_datos_tienda.sql` y llenar sus datos reales en el panel → «Datos de tu tienda».
