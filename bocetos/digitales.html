@@ -30,6 +30,13 @@
   .item { border:1px solid var(--borde); border-radius:10px; padding:10px; margin-bottom:8px; display:flex; gap:10px; align-items:center; }
   .mini { width:48px; height:48px; flex:none; }
   .estado { font-size:13px; padding:2px 8px; border-radius:999px; border:1px solid var(--borde); }
+  .oferta { background:#1f2328; color:#fff; border-radius:10px; padding:10px; margin-top:8px; text-align:center; }
+  .reloj { font-size:26px; font-weight:800; letter-spacing:1px; font-variant-numeric:tabular-nums; }
+  .tachado { text-decoration:line-through; color:var(--gris); }
+  .estrellas { color:#a15c00; font-weight:700; }
+  .garantia { border:1px solid var(--borde); border-radius:10px; padding:8px 10px; font-size:14px; margin-top:8px; }
+  .linea { display:flex; justify-content:space-between; font-size:14px; margin-top:4px; }
+  .nuevo { outline:3px dashed #c2410c; outline-offset:2px; border-radius:10px; }
   .etiqueta-nueva { font-size:13px; color:#ffd2b8; font-weight:700; }
 </style>
 </head>
@@ -43,28 +50,49 @@
     <div class="sec">
       <div class="caja" style="height:190px">Portada del curso o guía<br>(imagen que subes tú)</div>
       <h2 style="margin-top:12px">Guía: Vende por Instagram desde cero</h2>
-      <p><b>$ 12</b> · <span class="peq">Bs. según tasa del día</span></p>
+      <p class="nuevo"><span class="estrellas">★★★★★ 4,8</span> <span class="peq">· 23 opiniones · +120 descargas</span></p>
+      <p><span class="tachado">$ 12</span> <b style="font-size:20px">$ 9</b> · <span class="peq">Bs. según tasa del día</span></p>
+      <div class="oferta nuevo">
+        <div>🔥 <b>Oferta: −25 %</b> · termina en</div>
+        <div class="reloj">02 : 14 : 37</div>
+        <div style="font-size:13px">horas · minutos · segundos · hasta el viernes 31/10, 11:59 p. m.</div>
+      </div>
       <div class="ok">⚡ <b>Entrega inmediata</b>: lo descargas apenas confirmemos tu pago. Sin envíos.</div>
       <button class="btn naranja">Comprar ahora</button>
+      <button class="btn nuevo">👀 Ver muestra gratis (primeras 5 páginas)</button>
+      <div class="garantia nuevo">🛡️ <b>Garantía de 7 días</b>: si no te sirve, te devolvemos tu dinero.</div>
     </div>
     <div class="sec">
       <h2>Qué incluye</h2>
       <ul class="peq"><li>PDF de 45 páginas</li><li>10 plantillas para Canva</li><li>Acceso para siempre</li></ul>
       <h2 style="margin-top:10px">Formato</h2>
       <p class="peq">PDF y enlaces · Se abre en el teléfono o la computadora</p>
+      <div class="nuevo" style="margin-top:10px;padding:4px">
+        <h2>Lo que dicen</h2>
+        <p><span class="estrellas">★★★★★</span> <b>María P.</b> · <span class="peq">compra verificada</span></p>
+        <p class="peq">«Me ayudó a vender mis primeras tortas por Instagram.»</p>
+        <p class="peq" style="margin-top:4px">Ver las 23 opiniones →</p>
+      </div>
     </div>
   </div>
 
   <!-- 2. PAGAR (DIGITAL) -->
   <div class="tel">
     <div class="titulo">2 · Pagar (sin dirección de envío)</div>
-    <div class="barra"><span>← Volver</span><span class="logo">Total: $ 12</span></div>
+    <div class="barra"><span>← Volver</span><span class="logo">Total: $ 8,10</span></div>
     <div class="sec">
       <h2>1. ¿A dónde te avisamos?</h2>
       <div class="campo">Nombre y apellido</div>
       <div class="campo">WhatsApp</div>
       <div class="campo">Correo (para enviarte tu enlace)</div>
       <p class="peq" style="margin-top:6px">Ya no pedimos estado, ciudad ni oficina: no hay paquete.</p>
+    </div>
+    <div class="sec nuevo">
+      <h2>¿Tienes un cupón?</h2>
+      <div style="display:flex;gap:8px"><div class="campo" style="flex:1">MARIA10</div><div class="campo" style="color:var(--tinta);font-weight:700">Aplicar</div></div>
+      <div class="linea"><span>Precio de oferta</span><span>$ 9,00</span></div>
+      <div class="linea" style="color:var(--verde)"><span>Cupón MARIA10 (−10 %)</span><span>− $ 0,90</span></div>
+      <div class="linea" style="font-weight:700;font-size:16px"><span>Total</span><span>$ 8,10</span></div>
     </div>
     <div class="sec">
       <h2>2. ¿Cómo vas a pagar?</h2>
@@ -107,6 +135,12 @@
       <div class="item"><div class="caja mini">ZIP</div><div><b>plantillas-canva.zip</b><br><span class="peq">12 MB</span></div></div>
       <button class="btn naranja">Descargar</button>
       <p class="peq" style="margin-top:8px">Puedes volver a este enlace cuando quieras para descargarlo otra vez.</p>
+      <div class="nuevo" style="margin-top:10px;padding:4px">
+        <h2>¿Qué te pareció?</h2>
+        <p class="estrellas" style="font-size:22px">☆☆☆☆☆</p>
+        <div class="campo">Cuéntanos en una frase (opcional)</div>
+        <button class="btn">Enviar mi opinión</button>
+      </div>
     </div>
   </div>
 
@@ -127,8 +161,17 @@
       <div class="campo">Qué incluye (una línea por cosa)</div>
       <div class="campo">🖼 Portada (imagen)</div>
       <div class="campo">📎 Archivos que recibe el cliente (PDF, ZIP, video…)</div>
+      <div class="campo nuevo">👀 Muestra gratis (PDF o imagen, opcional)</div>
+      <div class="campo nuevo">🔥 Oferta: precio especial $ · termina el (fecha y hora) · opcional</div>
       <div class="campo">☐ Visible en la tienda</div>
       <button class="btn">Guardar producto</button>
+    </div>
+    <div class="sec nuevo" style="border-top:1px solid var(--borde)">
+      <h2>Cupones</h2>
+      <div class="item"><div style="flex:1"><b>MARIA10</b> · −10 %<br><span class="peq">Usado 14 veces · vence 31/12</span></div><span class="estado">Activo</span></div>
+      <div class="campo">Código · Descuento (% o $) · Vence · Usos máximos</div>
+      <button class="btn">Crear cupón</button>
+      <p class="peq" style="margin-top:8px">Las opiniones nuevas llegan aquí; tú decides cuáles se publican.</p>
     </div>
   </div>
 

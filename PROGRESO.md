@@ -2,7 +2,7 @@
 
 ## En qué vamos
 
-**Cambio de rumbo (2026-10-28): la tienda venderá productos digitales (cursos, guías, plantillas) con entrega automática, y más adelante productos importados. Ya no se venden productos locales de Dropi. En curso: boceto de los productos digitales. Pendiente: el panel da «Failed to fetch» (revisar `VITE_SUPABASE_URL` en Vercel).**
+**Cambio de rumbo (2026-10-28): la tienda venderá productos digitales (cursos, guías, plantillas) con entrega automática, y más adelante productos importados. Ya no se venden productos locales de Dropi. En curso: boceto de los productos digitales (con muestra, garantía, opiniones, cupones y oferta con cronómetro), esperando aprobación. Pendiente: el panel da «Failed to fetch» (revisar `VITE_SUPABASE_URL` en Vercel).**
 
 ## Decisiones tomadas (2026-10-24)
 
@@ -25,6 +25,11 @@
 | Entrega digital | Automática: al tocar «Pago confirmado», el cliente puede descargar desde el enlace secreto de su pedido | Elección del dueño. El pago en Venezuela (Pago Móvil, Zelle…) no se puede confirmar solo; todo lo de después sí |
 | Importados | «La forma que se pueda automatizar»: CJ Dropshipping tiene conexión para mandar pedidos solos, pero falta confirmar que envíe a Venezuela | Decisión del dueño (2026-10-28) |
 | Orden | Primero digitales, después importados | Elección del dueño (2026-10-28) |
+| Camino | Tienda propia (no Hotmart, Gumroad ni Payhip) | Esas plataformas no aceptan Pago Móvil, transferencia ni Binance (2026-10-28) |
+| Para vender más | Muestra gratis, garantía de devolución (7 días), opiniones con número de ventas, cupones y oferta por tiempo limitado con cronómetro | Elección del dueño (2026-10-28), copiando lo que funciona en Hotmart y Gumroad |
+| Cronómetro | Real: el dueño pone la fecha y hora de fin, igual para todos; el servidor cobra el precio normal si ya terminó. Nunca un cronómetro falso que se reinicia | Uno falso es publicidad engañosa y destruye la confianza |
+| Opiniones | Solo de compras verificadas; el dueño decide cuáles se publican | Que no haya opiniones inventadas |
+| Correo automático | Más adelante (necesita un servicio aparte). Al inicio el enlace se muestra en pantalla y por WhatsApp | Empezar sin costos extra |
 
 ## Reglas
 
