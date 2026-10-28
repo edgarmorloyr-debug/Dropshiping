@@ -40,6 +40,10 @@
 - `supabase/cambios/001_tienda.sql`: tablas, permisos, carpeta privada de comprobantes y las funciones `crear_pedido` (calcula el total en el servidor), `cambiar_estado_pedido` y `guardar_tasa`. Probado en `src/datos/supabase.test.ts`.
 - `supabase/hacerme_admin.sql`: da acceso al panel al único usuario que exista. `supabase/revisar.sql`: muestra qué está cargado.
 
+## Problemas resueltos
+
+- 2026-10-28 · El dueño no podía entrar al panel (usuario confirmado y administrador, pero nunca había entrado). Se arregló poniéndole una contraseña nueva desde el SQL Editor con `extensions.crypt(...)`. El panel ahora dice si el correo no está confirmado o si la contraseña es incorrecta.
+
 ## Pendientes conocidos
 
 - Si el dueño cambia la tasa justo mientras un cliente está pagando, el pedido queda guardado con la tasa nueva. El dueño lo ve en el panel al comparar el monto con el comprobante.
