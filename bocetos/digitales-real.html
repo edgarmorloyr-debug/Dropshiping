@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tienda digital · versión real</title>
+<style>
+  :root {
+    --fondo:#f7f5f2; --tarjeta:#ffffff; --tinta:#17181c; --suave:#5d6270; --borde:#e6e2dc;
+    --marca:#c2410c; --marca-clara:#fff1e8; --verde:#15803d; --verde-claro:#eaf7ee;
+    --estrella:#f59e0b; --radio:16px; --sombra:0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(23,24,28,.07);
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:#dcd7d0; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color:var(--tinta); }
+  .fila { display:flex; gap:32px; padding:32px; align-items:flex-start; flex-wrap:wrap; }
+  .tel { width:390px; background:var(--fondo); border-radius:36px; overflow:hidden; box-shadow:0 30px 60px rgba(0,0,0,.18); border:10px solid #111; position:relative; }
+  .etq { font: 600 13px/1 system-ui; color:#3d3a36; margin:0 0 10px 6px; letter-spacing:.3px; text-transform:uppercase; }
+
+  .aviso { background:var(--tinta); color:#fff; font-size:14px; padding:10px 16px; display:flex; align-items:center; justify-content:center; gap:10px; }
+  .reloj { display:inline-flex; gap:4px; font-variant-numeric:tabular-nums; font-weight:800; align-items:center; }
+  .reloj span { background:#fff; color:var(--tinta); border-radius:6px; padding:3px 6px; font-size:14px; }
+
+  .cab { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; background:var(--tarjeta); border-bottom:1px solid var(--borde); }
+  .marca { display:flex; align-items:center; gap:10px; font-weight:800; font-size:16px; }
+  .logo { width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg,#f97316,#c2410c); color:#fff; display:grid; place-items:center; font-weight:900; }
+  .carrito { font-size:20px; }
+
+  .hero { padding:24px 16px 8px; background:radial-gradient(120% 80% at 50% 0%, #ffe3cf 0%, var(--fondo) 70%); text-align:center; }
+  .libro { width:190px; height:250px; margin:0 auto; position:relative; transform:perspective(800px) rotateY(-14deg); transform-style:preserve-3d; filter:drop-shadow(18px 22px 22px rgba(80,30,0,.28)); }
+  .libro .tapa { position:absolute; inset:0; border-radius:4px 12px 12px 4px; background:linear-gradient(160deg,#1e1b4b 0%,#4c1d95 55%,#be185d 100%); color:#fff; padding:22px 18px; text-align:left; display:flex; flex-direction:column; justify-content:space-between; overflow:hidden; }
+  .libro .tapa::before { content:""; position:absolute; left:0; top:0; bottom:0; width:12px; background:linear-gradient(90deg,rgba(0,0,0,.35),rgba(255,255,255,.08)); }
+  .libro .tapa::after { content:""; position:absolute; right:-40px; top:-40px; width:160px; height:160px; border-radius:50%; background:radial-gradient(circle,#f97316 0%,transparent 70%); opacity:.55; }
+  .tapa small { font-size:11px; letter-spacing:2px; text-transform:uppercase; opacity:.85; position:relative; }
+  .tapa b { font-size:25px; line-height:1.05; position:relative; }
+  .tapa em { font-style:normal; font-size:12px; opacity:.9; position:relative; }
+  .paginas { position:absolute; right:-7px; top:6px; bottom:6px; width:8px; background:repeating-linear-gradient(90deg,#fff 0 1px,#e9e4dc 1px 2px); border-radius:0 3px 3px 0; }
+
+  .sec { padding:16px; }
+  h1 { font-size:26px; line-height:1.15; margin:18px 0 6px; letter-spacing:-.3px; }
+  .sub { color:var(--suave); font-size:16px; line-height:1.45; margin:0; }
+  .valoracion { display:flex; align-items:center; justify-content:center; gap:8px; margin-top:10px; font-size:14px; color:var(--suave); }
+  .est { color:var(--estrella); letter-spacing:1px; }
+
+  .precio { display:flex; align-items:baseline; justify-content:center; gap:10px; margin-top:14px; }
+  .precio .ahora { font-size:36px; font-weight:900; letter-spacing:-1px; }
+  .precio .antes { font-size:18px; color:var(--suave); text-decoration:line-through; }
+  .chip-desc { background:var(--verde-claro); color:var(--verde); font-weight:800; font-size:13px; border-radius:999px; padding:4px 10px; }
+  .bs { color:var(--suave); font-size:14px; margin-top:2px; }
+
+  .btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; min-height:54px; border-radius:14px; border:none; font: 800 17px/1 system-ui; cursor:pointer; }
+  .btn.principal { background:linear-gradient(180deg,#ea580c,#c2410c); color:#fff; box-shadow:0 6px 16px rgba(194,65,12,.35); }
+  .btn.sec2 { background:var(--tarjeta); color:var(--tinta); border:1.5px solid var(--borde); font-weight:700; font-size:16px; min-height:48px; }
+
+  .confianza { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px; }
+  .confianza div { background:var(--tarjeta); border:1px solid var(--borde); border-radius:12px; padding:10px 6px; text-align:center; font-size:12.5px; line-height:1.25; color:var(--suave); }
+  .confianza div b { display:block; color:var(--tinta); font-size:14px; margin-top:4px; }
+  .ico { font-size:20px; }
+
+  .tarjeta { background:var(--tarjeta); border:1px solid var(--borde); border-radius:var(--radio); padding:18px; box-shadow:var(--sombra); }
+  h2 { font-size:20px; margin:0 0 12px; letter-spacing:-.2px; }
+  .checks { list-style:none; padding:0; margin:0; display:grid; gap:10px; }
+  .checks li { display:flex; gap:10px; font-size:15px; line-height:1.4; }
+  .checks li::before { content:"✓"; flex:none; width:22px; height:22px; border-radius:50%; background:var(--verde-claro); color:var(--verde); font-weight:900; display:grid; place-items:center; font-size:13px; }
+
+  .muestra { display:flex; gap:10px; overflow:hidden; }
+  .pag { flex:none; width:104px; height:140px; border-radius:8px; background:#fff; border:1px solid var(--borde); box-shadow:var(--sombra); padding:10px; display:flex; flex-direction:column; gap:6px; }
+  .pag i { display:block; height:6px; border-radius:3px; background:#ece8e2; }
+  .pag i.t { height:10px; width:70%; background:#4c1d95; opacity:.8; }
+  .pag i.img { height:44px; background:linear-gradient(135deg,#fde68a,#fb923c); }
+
+  .modulo { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-top:1px solid var(--borde); font-size:15px; }
+  .modulo:first-of-type { border-top:none; }
+  .modulo span { color:var(--suave); font-size:13px; }
+
+  .opinion { background:var(--tarjeta); border:1px solid var(--borde); border-radius:14px; padding:14px; display:grid; gap:6px; }
+  .opinion + .opinion { margin-top:10px; }
+  .quien { display:flex; align-items:center; gap:10px; font-size:14px; }
+  .avatar { width:36px; height:36px; border-radius:50%; display:grid; place-items:center; color:#fff; font-weight:800; flex:none; }
+  .verif { color:var(--verde); font-size:12.5px; font-weight:600; }
+  .opinion p { margin:0; font-size:15px; line-height:1.45; }
+
+  .garantia { display:flex; gap:14px; align-items:center; background:var(--verde-claro); border:1px solid #bfe5cb; border-radius:var(--radio); padding:16px; }
+  .sello { flex:none; width:70px; height:70px; border-radius:50%; background:radial-gradient(circle,#22c55e,#15803d); color:#fff; display:grid; place-items:center; text-align:center; font-weight:900; line-height:1; box-shadow:0 0 0 4px #fff, 0 0 0 6px #86efac; font-size:24px; }
+  .sello small { display:block; font-size:9px; font-weight:700; }
+
+  .faq { border-top:1px solid var(--borde); padding:12px 0; font-size:15px; display:flex; justify-content:space-between; }
+  .faq:first-of-type { border-top:none; }
+
+  .fija { position:sticky; bottom:0; background:rgba(255,255,255,.96); border-top:1px solid var(--borde); padding:10px 16px 14px; display:flex; align-items:center; gap:12px; }
+  .fija .p { font-weight:900; font-size:20px; line-height:1; }
+  .fija .p small { display:block; font-size:12px; font-weight:600; color:var(--suave); margin-top:3px; }
+  .fija .btn { flex:1; min-height:50px; }
+
+  .resumen { display:flex; gap:12px; align-items:center; }
+  .mini-libro { width:52px; height:68px; border-radius:3px 7px 7px 3px; background:linear-gradient(160deg,#1e1b4b,#4c1d95 55%,#be185d); box-shadow:4px 6px 10px rgba(0,0,0,.2); flex:none; }
+  .lin { display:flex; justify-content:space-between; font-size:15px; padding:4px 0; }
+  .lin.total { font-size:19px; font-weight:900; border-top:1px solid var(--borde); margin-top:6px; padding-top:10px; }
+  .verde { color:var(--verde); }
+  .campo { display:block; margin-top:12px; }
+  .campo span { display:block; font-size:14px; font-weight:700; margin-bottom:6px; }
+  .input { border:1.5px solid var(--borde); background:#fff; border-radius:12px; min-height:50px; padding:14px; font-size:16px; color:#8a8f99; }
+  .input.lleno { color:var(--tinta); }
+  .metodos { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .metodo { border:1.5px solid var(--borde); border-radius:12px; padding:12px; font-weight:700; font-size:15px; background:#fff; display:flex; align-items:center; gap:8px; min-height:52px; }
+  .metodo.sel { border:2px solid var(--marca); background:var(--marca-clara); }
+  .punto { width:18px; height:18px; border-radius:50%; border:2px solid #c9c3ba; flex:none; }
+  .metodo.sel .punto { border:5px solid var(--marca); }
+  .datos-pago { margin-top:12px; background:var(--marca-clara); border-radius:14px; padding:14px; }
+  .monto { font-size:28px; font-weight:900; letter-spacing:-.5px; }
+  .dato { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-top:1px dashed #f3c9ad; font-size:15px; }
+  .dato small { display:block; color:var(--suave); font-size:12.5px; }
+  .copiar { border:1.5px solid var(--tinta); background:#fff; border-radius:9px; padding:8px 12px; font-weight:700; font-size:13px; }
+  .pasos { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--suave); font-weight:600; }
+  .pasos b { width:22px; height:22px; border-radius:50%; background:#d9d4cc; color:var(--tinta); display:grid; place-items:center; font-size:12px; }
+  .pasos b.on { background:var(--tinta); color:#fff; }
+  .seguro { text-align:center; color:var(--suave); font-size:13px; margin-top:10px; }
+
+  .exito { text-align:center; padding:28px 16px 8px; background:radial-gradient(120% 80% at 50% 0%, #d9f7e3 0%, var(--fondo) 70%); }
+  .circulo { width:76px; height:76px; border-radius:50%; background:var(--verde); color:#fff; font-size:40px; display:grid; place-items:center; margin:0 auto; box-shadow:0 0 0 10px #c9f0d6; }
+  .archivo { display:flex; align-items:center; gap:12px; background:#fff; border:1px solid var(--borde); border-radius:14px; padding:12px; }
+  .archivo + .archivo { margin-top:10px; }
+  .tipo { width:44px; height:52px; border-radius:8px; display:grid; place-items:center; color:#fff; font-weight:900; font-size:12px; flex:none; }
+  .archivo .bajar { margin-left:auto; width:44px; height:44px; border-radius:12px; background:var(--marca-clara); color:var(--marca); display:grid; place-items:center; font-size:20px; font-weight:900; }
+  .estrellas-grandes { font-size:30px; color:#d6d1c9; letter-spacing:4px; text-align:center; }
+</style>
+</head>
+<body>
+<div class="fila">
+
+<!-- ============ 1. PÁGINA DEL PRODUCTO ============ -->
+<div id="p1">
+<p class="etq">1 · Página del producto</p>
+<div class="tel">
+  <div class="aviso">🔥 Oferta −25 % termina en <span class="reloj"><span>02</span>:<span>14</span>:<span>37</span></span></div>
+  <div class="cab"><div class="marca"><div class="logo">N</div>Nombre de la tienda</div><div class="carrito">🛒</div></div>
+
+  <div class="hero">
+    <div class="libro"><div class="paginas"></div><div class="tapa"><small>Guía práctica</small><b>Vende por Instagram desde cero</b><em>45 páginas · 10 plantillas</em></div></div>
+    <h1>Consigue tus primeros clientes por Instagram en 14 días</h1>
+    <p class="sub">El paso a paso, con plantillas listas para Canva, para que tu negocio venda aunque empieces con 0 seguidores.</p>
+    <div class="valoracion"><span class="est">★★★★★</span><b style="color:var(--tinta)">4,8</b> · 23 opiniones · +120 descargas</div>
+    <div class="precio"><span class="antes">$ 12</span><span class="ahora">$ 9</span><span class="chip-desc">−25 %</span></div>
+    <div class="bs">Bs. 1.939,50 al cambio de hoy</div>
+  </div>
+
+  <div class="sec">
+    <button class="btn principal">Quiero la guía ahora →</button>
+    <div class="confianza">
+      <div><span class="ico">⚡</span><b>Al instante</b>al confirmar tu pago</div>
+      <div><span class="ico">🛡️</span><b>Garantía</b>7 días</div>
+      <div><span class="ico">💳</span><b>Pago Móvil</b>Zelle · Binance</div>
+    </div>
+  </div>
+
+  <div class="sec"><div class="tarjeta">
+    <h2>Lo que vas a lograr</h2>
+    <ul class="checks">
+      <li>Un perfil que da confianza desde el primer vistazo</li>
+      <li>30 ideas de publicaciones que venden, listas para copiar</li>
+      <li>Cómo responder mensajes para cerrar la venta</li>
+      <li>10 plantillas editables en Canva</li>
+    </ul>
+  </div></div>
+
+  <div class="sec"><div class="tarjeta">
+    <h2>Mira por dentro</h2>
+    <div class="muestra">
+      <div class="pag"><i class="t"></i><i></i><i></i><i class="img"></i><i></i><i style="width:60%"></i></div>
+      <div class="pag"><i class="t"></i><i class="img"></i><i></i><i></i><i style="width:80%"></i></div>
+      <div class="pag"><i class="t"></i><i></i><i style="width:70%"></i><i></i><i class="img"></i></div>
+    </div>
+    <div style="height:12px"></div>
+    <button class="btn sec2">👀 Leer las primeras 5 páginas gratis</button>
+  </div></div>
+
+  <div class="sec"><div class="tarjeta">
+    <h2>Contenido</h2>
+    <div class="modulo">1. Tu perfil que vende <span>8 págs.</span></div>
+    <div class="modulo">2. Qué publicar cada semana <span>12 págs.</span></div>
+    <div class="modulo">3. De mensaje a venta <span>10 págs.</span></div>
+    <div class="modulo">4. Plantillas para Canva <span>10 diseños</span></div>
+  </div></div>
+
+  <div class="sec">
+    <h2>Lo que dicen quienes la compraron</h2>
+    <div class="opinion">
+      <div class="quien"><div class="avatar" style="background:#be185d">M</div><div><b>María P.</b> · Valencia<br><span class="est" style="font-size:13px">★★★★★</span> <span class="verif">✓ Compra verificada</span></div></div>
+      <p>«En la segunda semana vendí mis primeras 6 tortas por Instagram. Las plantillas me ahorraron horas.»</p>
+    </div>
+    <div class="opinion">
+      <div class="quien"><div class="avatar" style="background:#0f766e">J</div><div><b>José R.</b> · Caracas<br><span class="est" style="font-size:13px">★★★★★</span> <span class="verif">✓ Compra verificada</span></div></div>
+      <p>«Clara y directa. Lo de responder mensajes me cambió las ventas.»</p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="garantia">
+      <div class="sello">7<small>DÍAS DE<br>GARANTÍA</small></div>
+      <div><b>Compra sin riesgo</b><br><span style="font-size:14px;color:var(--suave)">Si en 7 días no te sirve, escríbenos y te devolvemos tu dinero completo.</span></div>
+    </div>
+  </div>
+
+  <div class="sec"><div class="tarjeta">
+    <h2>Preguntas frecuentes</h2>
+    <div class="faq">¿Cómo la recibo? <span>+</span></div>
+    <div class="faq">¿Sirve si no tengo seguidores? <span>+</span></div>
+    <div class="faq">¿Puedo pagar en bolívares? <span>+</span></div>
+  </div></div>
+
+  <div style="height:8px"></div>
+  <div class="fija"><div class="p">$ 9<small>antes $ 12</small></div><button class="btn principal">Comprar ahora</button></div>
+</div>
+</div>
+
+<!-- ============ 2. PAGAR ============ -->
+<div id="p2">
+<p class="etq">2 · Pagar</p>
+<div class="tel">
+  <div class="cab"><div class="marca">← Pagar</div><div class="pasos"><b class="on">1</b>Datos <b>2</b>Pago <b>3</b>Listo</div></div>
+
+  <div class="sec"><div class="tarjeta">
+    <div class="resumen"><div class="mini-libro"></div><div><b>Vende por Instagram desde cero</b><br><span style="color:var(--suave);font-size:14px">Guía en PDF + 10 plantillas</span></div></div>
+    <div style="height:12px"></div>
+    <div class="lin"><span>Precio de oferta</span><span>$ 9,00</span></div>
+    <div class="lin verde"><span>Cupón MARIA10 (−10 %)</span><span>− $ 0,90</span></div>
+    <div class="lin total"><span>Total</span><span>$ 8,10</span></div>
+    <div style="text-align:right;color:var(--suave);font-size:13px">Bs. 1.745,55 al cambio de hoy</div>
+  </div></div>
+
+  <div class="sec" style="padding-top:0">
+    <h2>¿A dónde te avisamos?</h2>
+    <label class="campo"><span>Nombre</span><div class="input lleno">María Pérez</div></label>
+    <label class="campo"><span>WhatsApp</span><div class="input lleno">0414-123-4567</div></label>
+    <label class="campo"><span>Correo</span><div class="input">tucorreo@gmail.com</div></label>
+  </div>
+
+  <div class="sec">
+    <h2>¿Cómo pagas?</h2>
+    <div class="metodos">
+      <div class="metodo sel"><span class="punto"></span>Pago Móvil</div>
+      <div class="metodo"><span class="punto"></span>Zelle</div>
+      <div class="metodo"><span class="punto"></span>Binance</div>
+      <div class="metodo"><span class="punto"></span>PayPal</div>
+    </div>
+    <div class="datos-pago">
+      <div style="font-size:14px;color:var(--suave)">Paga exactamente</div>
+      <div class="monto">Bs. 1.745,55</div>
+      <div class="dato"><div><small>Banco</small>Banco de ejemplo (0000)</div><span class="copiar">Copiar</span></div>
+      <div class="dato"><div><small>Teléfono</small>0414-000-0000</div><span class="copiar">Copiar</span></div>
+      <div class="dato"><div><small>Cédula</small>V-00.000.000</div><span class="copiar">Copiar</span></div>
+    </div>
+    <label class="campo"><span>Número de referencia</span><div class="input">Ej. 004512</div></label>
+    <label class="campo"><span>Captura del pago</span><div class="input" style="text-align:center;border-style:dashed">📎 Toca para subir la captura</div></label>
+    <div style="height:14px"></div>
+    <button class="btn principal">Enviar mi pedido</button>
+    <div class="seguro">🔒 Tus datos están protegidos · Sin crear cuenta</div>
+  </div>
+</div>
+</div>
+
+<!-- ============ 3. MI PEDIDO ============ -->
+<div id="p3">
+<p class="etq">3 · «Mi pedido», con el pago confirmado</p>
+<div class="tel">
+  <div class="cab"><div class="marca"><div class="logo">N</div>Nombre de la tienda</div></div>
+  <div class="exito">
+    <div class="circulo">✓</div>
+    <h1 style="margin-top:18px">¡Listo, María! Ya es tuya</h1>
+    <p class="sub">Pedido #12 · Pago confirmado. Puedes volver a este enlace cuando quieras.</p>
+  </div>
+  <div class="sec">
+    <div class="archivo"><div class="tipo" style="background:#dc2626">PDF</div><div><b>Guía Instagram</b><br><span style="color:var(--suave);font-size:13px">45 páginas · 4,2 MB</span></div><div class="bajar">↓</div></div>
+    <div class="archivo"><div class="tipo" style="background:#7c3aed">ZIP</div><div><b>Plantillas Canva</b><br><span style="color:var(--suave);font-size:13px">10 diseños · 12 MB</span></div><div class="bajar">↓</div></div>
+    <div style="height:14px"></div>
+    <button class="btn principal">Descargar todo</button>
+  </div>
+  <div class="sec"><div class="tarjeta" style="text-align:center">
+    <h2 style="margin-bottom:6px">¿Qué te pareció?</h2>
+    <p style="color:var(--suave);font-size:14px;margin:0 0 6px">Tu opinión ayuda a otros a decidirse</p>
+    <div class="estrellas-grandes">★★★★★</div>
+    <div style="height:8px"></div>
+    <button class="btn sec2">Dejar mi opinión</button>
+  </div></div>
+  <div class="sec"><div class="tarjeta" style="display:flex;gap:12px;align-items:center;background:var(--marca-clara);border-color:#f8d2bb">
+    <div class="mini-libro" style="background:linear-gradient(160deg,#064e3b,#0f766e 55%,#f59e0b)"></div>
+    <div style="flex:1"><b>Te puede servir también</b><br><span style="font-size:14px;color:var(--suave)">Plantillas de menú · <s>$ 8</s> <b style="color:var(--tinta)">$ 5</b> solo hoy</span></div>
+  </div></div>
+  <div style="height:16px"></div>
+</div>
+</div>
+
+</div>
+</body>
+</html>
